@@ -54,16 +54,8 @@ WSGI_APPLICATION = 'ai_learning_ecosystem.wsgi.application'
 # Arkadaşların bağlandığında HOST kısmını kendi bilgisayar adlarıyla değiştirmeli 
 DATABASES = {
     'default': {
-        'ENGINE': 'mssql',
-        'NAME': 'AI_Koc_DB', 
-        'HOST': 'YUSUF', # Senin bilgisayarında 'YUSUF' kalabilir 
-        'USER': '',           
-        'PASSWORD': '',      
-        'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
-            'unicode_results': True,
-            'trusted_connection': 'yes', # Windows Authentication için eklendi
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
