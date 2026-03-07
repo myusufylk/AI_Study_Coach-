@@ -1,0 +1,31 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giriş Yap</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="form-container">
+        <div class="form-box">
+            <h2>Giriş Yap</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="input-group">
+                    <label for="username">Email veya Kullanıcı Adı</label>
+                    <input type="text" id="username" name="username" placeholder="Email veya Kullanıcı Adı girin" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">Şifre</label>
+                    <input type="password" id="password" name="password" placeholder="Şifrenizi girin" required>
+                </div>
+                <button type="submit" class="submit-btn">Giriş Yap</button>
+            </form>
+            <p class="form-footer">Hesabınız yok mu? <a href="#">Kayıt Ol</a></p>
+        </div>
+    </div>
+</body>
+</html>
