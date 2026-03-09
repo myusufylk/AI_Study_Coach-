@@ -1,54 +1,75 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.models import User
+from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+
+from .forms import ProfileForm
+from .models import Profile
+
 
 def home(request):
-    return render(request, 'base.html')
+
+    profile = None
+
+    if request.user.is_authenticated:
+        profile = Profile.objects.filter(user=request.user).first()
+
+    return render(request, 'base.html', {'profile': profile})
+
 
 def register_view(request):
-    if request.user.is_authenticated: 
-        return redirect('home')                # (Giriş yapmış kullanıcıyı ana sayfaya yönlendiriyoruz (Güvenlik))
 
-    if request.method == 'POST':
-        
-        u_name = request.POST.get('username')         # We retrieve data using 'name' tags in HTML form.
-        u_email = request.POST.get('email')                                 # (HTML formundaki 'name' etiketleriyle verileri çekiyoruz)
-        u_pass = request.POST.get('password')
-        u_pass_confirm = request.POST.get('password_confirm')
-
-       
-        if u_pass != u_pass_confirm:                                                 # Are the passwords the same?
-            messages.error(request, 'Şifreler eşleşmiyor!')                 #( Şifreler aynı mı?)
-            return render(request, 'register.html')
-
-        if User.objects.filter(username=u_name).exists():                #Does the username already exist?
-            messages.error(request, 'bu kullanıcı adı zaten alınmış!')   # (Kullanıcı adı zaten var mı?)
-            return render(request, 'register.html')
-
-        
-        User.objects.create_user(username=u_name, email=u_email, password=u_pass)                       # Register the user in MSSQL.
-        messages.success(request, 'Kaydınız başarıyla oluşturuldu! Şimdi giriş yapabilirsiniz.')    # (Kullanıcıyı MSSQL'e kaydet)
-        return redirect('login')  # After registration, it redirects to the login page.    ( # Kayıttan sonra giriş sayfasına yönlendirir  )
-
-    return render(request, 'register.html')
-
-def login_view(request):
-    # Giriş yapmış kullanıcıyı ana sayfaya yönlendiriyoruz (Güvenlik)
     if request.user.is_authenticated:
         return redirect('home')
 
     if request.method == 'POST':
+
+        u_name = request.POST.get('username')
+        u_email = request.POST.get('email')
+        u_pass = request.POST.get('password')
+        u_pass_confirm = request.POST.get('password_confirm')
+
+        if u_pass != u_pass_confirm:
+            messages.error(request, 'Şifreler eşleşmiyor!')
+            return render(request, 'register.html')
+
+        if User.objects.filter(username=u_name).exists():
+            messages.error(request, 'Bu kullanıcı adı zaten alınmış!')
+            return render(request, 'register.html')
+
+        User.objects.create_user(
+            username=u_name,
+            email=u_email,
+            password=u_pass
+        )
+
+        messages.success(request, 'Kaydınız başarıyla oluşturuldu! Şimdi giriş yapabilirsiniz.')
+        return redirect('login')
+
+    return render(request, 'register.html')
+
+
+def login_view(request):
+
+    if request.user.is_authenticated:
+        return redirect('home')
+
+    if request.method == 'POST':
+
         form = AuthenticationForm(data=request.POST)
 
         if form.is_valid():
             user = form.get_user()
             login(request, user)
+
             messages.success(request, f"Hoş geldin, {user.username}!")
-            return redirect('home') # Ana sayfaya yönlendirir
+            return redirect('home')
+
         else:
             messages.error(request, "Hatalı kullanıcı adı veya şifre!")
+
     else:
         form = AuthenticationForm()
 
@@ -56,6 +77,31 @@ def login_view(request):
 
 
 def logout_view(request):
+
     logout(request)
     messages.info(request, "Başarıyla çıkış yaptınız.")
+
     return redirect('home')
+
+
+@login_required
+def profile_view(request):
+
+    profile = Profile.objects.filter(user=request.user).first()
+
+    if request.method == "POST":
+
+        form = ProfileForm(request.POST, instance=profile)
+
+        if form.is_valid():
+            profile = form.save(commit=False)
+            profile.user = request.user
+            profile.save()
+
+            messages.success(request, "Profil başarıyla kaydedildi.")
+            return redirect("home")
+
+    else:
+        form = ProfileForm(instance=profile)
+
+    return render(request, "profile.html", {"form": form})

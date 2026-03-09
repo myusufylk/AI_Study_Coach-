@@ -1,37 +1,82 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Django App{% endblock %}</title>
-    <!-- Link to our clean Flexbox CSS -->
+
+    <title>{% block title %}AI Study Coach{% endblock %}</title>
+
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 
 <body>
-    <header class="navbar">
-        <div class="logo">MyApp</div>
-        <nav>
-            <ul class="nav-links">
-                <!-- Placeholders for future frontend development -->
-                <li><a href="#">Home</a></li>
-                <li><a href="#">Login</a></li>
-                <li><a href="#">Register</a></li>
-            </ul>
-        </nav>
-    </header>
 
-    <main class="content">
-        <!-- Other templates will inject their specific content here -->
-        {% block content %}
-        {% endblock %}
-    </main>
+<header class="navbar">
 
-    <footer class="footer">
-        <p>&copy; 2026 MyApp. All rights reserved.</p>
-    </footer>
+    <div class="logo">AI Study Coach</div>
+
+    <nav>
+        <ul class="nav-links">
+
+            <li><a href="/">Ana Sayfa</a></li>
+
+            {% if user.is_authenticated %}
+
+                <li><a href="/profile/">Profil</a></li>
+                <li><a href="/logout/">Çıkış Yap</a></li>
+
+            {% else %}
+
+                <li><a href="/login/">Giriş Yap</a></li>
+                <li><a href="/register/">Kayıt Ol</a></li>
+
+            {% endif %}
+
+        </ul>
+    </nav>
+
+</header>
+
+
+<main class="content">
+
+    <!-- Django mesajları -->
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+
+    <!-- Kullanıcı giriş yaptıysa profil bilgileri -->
+    {% if user.is_authenticated and profile %}
+
+        <div class="profile-info">
+
+            <h3>Kullanıcı Bilgileri</h3>
+
+            <p><strong>Hedef Sınav:</strong> {{ profile.target_exam }}</p>
+            <p><strong>Günlük Çalışma Saati:</strong> {{ profile.daily_hours }}</p>
+
+        </div>
+
+    {% endif %}
+
+
+    {% block content %}
+    {% endblock %}
+
+</main>
+
+
+<footer class="footer">
+
+    <p>© 2026 AI Study Coach. Tüm hakları saklıdır.</p>
+
+</footer>
+
+
 </body>
-
 </html>
