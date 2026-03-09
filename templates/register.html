@@ -14,9 +14,17 @@
     <div class="form-container">
         <div class="form-box">
             <h2>Kayıt Ol</h2>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div style="color: #ef4444; background-color: #fef2f2; padding: 12px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 14px; border: 1px solid #fee2e2; font-weight: 500;">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
             <form method="POST">
-                {% csrf_token %}
-                <div class="input-group">
+                {% csrf_token %} <div class="input-group">
                     <label for="username">Kullanıcı Adı</label>
                     <input type="text" id="username" name="username" placeholder="Kullanıcı adınızı girin" required>
                 </div>
@@ -35,7 +43,7 @@
                 </div>
                 <button type="submit" class="submit-btn">Kayıt Ol</button>
             </form>
-            <p class="form-footer">Zaten bir hesabınız var mı? <a href="#">Giriş Yap</a></p>
+            <p class="form-footer">Zaten bir hesabınız var mı? <a href="{% url 'login' %}">Giriş Yap</a></p>
         </div>
     </div>
 </body>
