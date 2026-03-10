@@ -19,4 +19,8 @@ urlpatterns = [
     # Çıkış İşlemi
     path('logout/', views.logout_view, name='logout'),
     path('profile/', views.profile_view, name='profile'),
+    
+    # Yeni Arayüzler
+    path('subjects/', views.subjects_view, name='subjects'),
+    path('weekly-goal/', views.weekly_goal_view, name='weekly_goal'),
 ]

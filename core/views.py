@@ -15,6 +15,7 @@ def home(request):
 
     if request.user.is_authenticated:
         profile = Profile.objects.filter(user=request.user).first()
+        return render(request, 'dashboard.html', {'profile': profile})
 
     return render(request, 'base.html', {'profile': profile})
 
@@ -105,3 +106,13 @@ def profile_view(request):
         form = ProfileForm(instance=profile)
 
     return render(request, "profile.html", {"form": form})
+
+
+@login_required
+def subjects_view(request):
+    return render(request, 'subjects.html')
+
+
+@login_required
+def weekly_goal_view(request):
+    return render(request, 'weekly_goal.html')
