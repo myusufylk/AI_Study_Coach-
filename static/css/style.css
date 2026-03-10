@@ -120,3 +120,93 @@ body {
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
     }
 }
+
+/* --- Layout Flex Fix --- */
+/* Ensure the body flex aligns header and main as a vertical column */
+body {
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.content {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Dashboard Specific Styles --- */
+.dashboard-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.dashboard-welcome {
+    font-size: 28px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 32px;
+}
+
+.dashboard-grid {
+    display: grid;
+    /* Responsive auto-fit grid */
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+.dashboard-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    min-height: 280px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.card-content {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px dashed #e5e7eb;
+    border-radius: 12px;
+    background-color: #f9fafb;
+    padding: 24px;
+}
+
+.placeholder-text {
+    color: #9ca3af;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 24px 16px;
+    }
+    
+    .dashboard-welcome {
+        font-size: 24px;
+        margin-bottom: 24px;
+    }
+}

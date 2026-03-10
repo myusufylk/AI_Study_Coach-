@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - AI Study Coach{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h2 class="dashboard-welcome">Welcome, {{ user.username }}!</h2>
+    
+    <div class="dashboard-grid">
+        <!-- Card 1: Weekly Goals -->
+        <div class="dashboard-card">
+            <h3 class="card-title">Weekly Goals</h3>
+            <div class="card-content">
+                <!-- Form will be placed here by Teammate -->
+                <span class="placeholder-text">Weekly Goals Form Placeholder</span>
+            </div>
+        </div>
+        
+        <!-- Card 2: Course Selection -->
+        <div class="dashboard-card">
+            <h3 class="card-title">Course Selection</h3>
+            <div class="card-content">
+                <!-- Form will be placed here by Teammate -->
+                <span class="placeholder-text">Course Selection Form Placeholder</span>
+            </div>
+        </div>
+        
+        <!-- Card 3: My Schedule -->
+        <div class="dashboard-card">
+            <h3 class="card-title">My Schedule</h3>
+            <div class="card-content">
+                <!-- For future AI generated schedule -->
+                <span class="placeholder-text">AI Generated Schedule Placeholder</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
