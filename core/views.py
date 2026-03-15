@@ -4,10 +4,12 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-
+import google.generativeai as genai
 from .forms import ProfileForm
 from .models import Profile
 
+
+genai.configure(api_key="API KEY GİRİN")
 
 def home(request):
 
@@ -116,3 +118,17 @@ def subjects_view(request):
 @login_required
 def weekly_goal_view(request):
     return render(request, 'weekly_goal.html')
+@login_required
+def ai_coach_view(request):
+    response_text = ""
+    if request.method == "POST":
+        user_query = request.POST.get("user_query") 
+        
+        model = genai.GenerativeModel('gemini-2.0-flash')
+        full_prompt = f"Sen bir eğitim koçusun. İsmin AI Study Coach. Öğrencinin sorusu şu: {user_query}"
+        
+        
+        ai_response = model.generate_content(full_prompt)
+        response_text = ai_response.text
+
+    return render(request, 'ai_coach.html', {'response': response_text})
