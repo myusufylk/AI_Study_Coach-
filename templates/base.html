@@ -1,0 +1,172 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AI Study Coach{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<header class="navbar">
+
+    <div class="logo">
+        AI Study Coach
+    </div>
+
+    <nav>
+        <ul class="nav-links">
+
+            <li><a href="{% url 'home' %}">Ana Sayfa</a></li>
+
+            {% if user.is_authenticated %}
+
+                <li><a href="{% url 'profile' %}">Profil</a></li>
+                <li><a href="{% url 'subjects' %}">Dersler</a></li>
+                <li><a href="{% url 'weekly_goal' %}">Haftalık Hedef</a></li>
+                <li><a href="{% url 'ai_coach' %}">AI Koç</a></li>
+
+                <li><a href="{% url 'logout' %}">Çıkış Yap</a></li>
+
+            {% else %}
+
+                <li><a href="{% url 'login' %}">Giriş Yap</a></li>
+                <li><a href="{% url 'register' %}">Kayıt Ol</a></li>
+
+            {% endif %}
+
+        </ul>
+    </nav>
+
+</header>
+
+
+<main class="content">
+
+<div class="dashboard-container">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="
+                background:#dbeafe;
+                color:#1e40af;
+                padding:15px;
+                border-radius:10px;
+                margin-bottom:20px;
+                text-align:center;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if user.is_authenticated %}
+
+        <h1 class="dashboard-welcome">
+            Hoş geldin, {{ user.username }} 👋
+        </h1>
+
+        <div class="dashboard-grid">
+
+            <div class="dashboard-card">
+
+                <h3 class="card-title">Kullanıcı Bilgileri</h3>
+
+                <div class="card-content">
+
+                    {% if profile %}
+
+                        <div style="text-align:left;width:100%;">
+
+                            <p>
+                                <strong>🎯 Hedef Sınav:</strong>
+                                {{ profile.target_exam }}
+                            </p>
+
+                            <p>
+                                <strong>⏰ Günlük Çalışma:</strong>
+                                {{ profile.daily_hours }} saat
+                            </p>
+
+                        </div>
+
+                    {% else %}
+
+                        <p class="placeholder-text">
+                            Profil bilgileri henüz girilmemiş.
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-card">
+
+                <h3 class="card-title">
+                    Aktif Görevler
+                </h3>
+
+                <div class="card-content">
+
+                    {% block content %}
+                    {% endblock %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% else %}
+
+        <div class="form-container">
+
+            <div class="form-box" style="max-width:600px;">
+
+                <h2>Yapay Zeka Destekli Çalışma Koçu</h2>
+
+                <p style="
+                    text-align:center;
+                    color:#6b7280;">
+
+                    Sınav yolculuğunda sana özel çalışma planları hazırlayan
+                    yapay zeka asistanına hoş geldin.
+
+                    Devam etmek için giriş yap.
+
+                </p>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+</main>
+
+
+<footer class="footer"
+        style="
+        padding:20px;
+        text-align:center;
+        color:#9ca3af;
+        font-size:14px;">
+
+<p>
+© 2026 AI Study Coach. Tüm hakları saklıdır.
+</p>
+
+</footer>
+
+</body>
+</html>

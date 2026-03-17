@@ -1,0 +1,212 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f3f4f6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: #1f2937;
+}
+
+.form-container {
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.form-box {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 420px;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+.form-box h2 {
+    font-weight: 600;
+    font-size: 26px;
+    margin-bottom: 28px;
+    text-align: center;
+    color: #111827;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    font-weight: 500;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #4b5563;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    outline: none;
+    transition: all 0.3s ease;
+    background-color: #f9fafb;
+}
+
+.input-group input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    background-color: #ffffff;
+}
+
+.input-group input::placeholder {
+    color: #9ca3af;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 14px;
+    margin-top: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    background-color: #3b82f6;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.submit-btn:hover {
+    background-color: #2563eb;
+}
+
+.submit-btn:active {
+    transform: scale(0.98);
+}
+
+.form-footer {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.form-footer a {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.form-footer a:hover {
+    color: #1d4ed8;
+}
+
+@media (max-width: 480px) {
+    .form-box {
+        padding: 30px 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+    }
+}
+
+/* --- Layout Flex Fix --- */
+/* Ensure the body flex aligns header and main as a vertical column */
+body {
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.content {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Dashboard Specific Styles --- */
+.dashboard-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.dashboard-welcome {
+    font-size: 28px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 32px;
+}
+
+.dashboard-grid {
+    display: grid;
+    /* Responsive auto-fit grid */
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+.dashboard-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    min-height: 280px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.card-content {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px dashed #e5e7eb;
+    border-radius: 12px;
+    background-color: #f9fafb;
+    padding: 24px;
+}
+
+.placeholder-text {
+    color: #9ca3af;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 24px 16px;
+    }
+    
+    .dashboard-welcome {
+        font-size: 24px;
+        margin-bottom: 24px;
+    }
+}

@@ -1,0 +1,69 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ders Seçimi - Eğitim Planlama</title>
+    <!-- Modern Tasarım İçin İnter Fontu -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CSS Bağlantısı - Django Static ile -->
+    <link rel="stylesheet" href="{% static 'css/subjects_style.css' %}">
+</head>
+<body>
+
+    <div class="goals-container">
+        <div class="goals-header">
+            <h1>Ders Seçimi</h1>
+            <p>Çalışmak istediğiniz dersleri belirleyin</p>
+        </div>
+
+        <form>
+            <div class="goals-form-group goals-checkbox-list">
+                <label class="goals-checkbox-item">
+                    <input type="checkbox" name="subject" value="matematik">
+                    <span class="goals-checkbox-label">Matematik</span>
+                </label>
+                
+                <label class="goals-checkbox-item">
+                    <input type="checkbox" name="subject" value="fizik">
+                    <span class="goals-checkbox-label">Fizik</span>
+                </label>
+                
+                <label class="goals-checkbox-item">
+                    <input type="checkbox" name="subject" value="kimya">
+                    <span class="goals-checkbox-label">Kimya</span>
+                </label>
+                
+                <label class="goals-checkbox-item">
+                    <input type="checkbox" name="subject" value="biyoloji">
+                    <span class="goals-checkbox-label">Biyoloji</span>
+                </label>
+                
+                <label class="goals-checkbox-item">
+                    <input type="checkbox" name="subject" value="turkce">
+                    <span class="goals-checkbox-label">Türkçe</span>
+                </label>
+                
+                <label class="goals-checkbox-item">
+                    <input type="checkbox" name="subject" value="tarih">
+                    <span class="goals-checkbox-label">Tarih</span>
+                </label>
+                
+                <label class="goals-checkbox-item">
+                    <input type="checkbox" name="subject" value="cografya">
+                    <span class="goals-checkbox-label">Coğrafya</span>
+                </label>
+                
+                <label class="goals-checkbox-item">
+                    <input type="checkbox" name="subject" value="ingilizce">
+                    <span class="goals-checkbox-label">İngilizce</span>
+                </label>
+            </div>
+
+            <button type="submit" class="goals-btn-submit">Kaydet</button>
+        </form>
+    </div>
+
+</body>
+</html>
