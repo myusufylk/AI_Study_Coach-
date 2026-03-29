@@ -20,7 +20,8 @@
             <p>Hedeflerinizi belirleyerek başarıya ulaşın</p>
         </div>
 
-        <form>
+        <form method="POST">
+            {% csrf_token %}
             <div class="goals-form-group">
                 <label for="hours_per_day" class="goals-form-label">Günde kaç saat çalışacaksın?</label>
                 <input type="number" id="hours_per_day" name="hours_per_day" class="goals-form-control" min="1" max="24"

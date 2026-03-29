@@ -18,7 +18,8 @@
             <p>Çalışmak istediğiniz dersleri belirleyin</p>
         </div>
 
-        <form>
+        <form method="POST">
+            {% csrf_token %}
             <div class="goals-form-group goals-checkbox-list">
                 <label class="goals-checkbox-item">
                     <input type="checkbox" name="subject" value="matematik">

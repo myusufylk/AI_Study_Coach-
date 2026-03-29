@@ -9,6 +9,11 @@ class Profile(models.Model):
     target_exam = models.CharField(max_length=100)
 
     daily_hours = models.IntegerField(default=4)
+    
+    selected_subjects = models.CharField(max_length=255, blank=True, null=True)
+    weekly_study_days = models.IntegerField(default=5)
+    priority_subject = models.CharField(max_length=100, blank=True, null=True)
+    weekly_goal_note = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.user.username
