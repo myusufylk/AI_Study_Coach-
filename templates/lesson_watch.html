@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="lesson-container">
+    <div class="lesson-main">
+        <div class="lesson-video-wrapper">
+            {% if video.url %}
+                <iframe class="lesson-video-iframe" src="{{ video.url }}" frameborder="0" allowfullscreen></iframe>
+            {% else %}
+                <div class="lesson-video-placeholder">Video kaynağı bulunamadı</div>
+            {% endif %}
+        </div>
+        
+        <div class="lesson-info">
+            <h1 class="lesson-title">{{ lesson.name }}</h1>
+            <h2 class="lesson-topic">{{ topic.title }}</h2>
+        </div>
+        
+        <div class="lesson-controls">
+            <button class="lesson-btn lesson-btn-prev">Önceki</button>
+            <button class="lesson-btn lesson-btn-next">Sonraki</button>
+        </div>
+    </div>
+
+    <aside class="lesson-sidebar">
+        <h3 class="lesson-sidebar-title">Ders Videoları</h3>
+        <div class="lesson-playlist">
+            {% if videos %}
+                {% for v in videos %}
+                    <div class="lesson-playlist-item">
+                        <div class="lesson-playlist-info">
+                            <span class="lesson-playlist-title">{{ v.title }}</span>
+                            {% if v.duration %}
+                                <span class="lesson-playlist-duration">{{ v.duration }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="lesson-playlist-empty">Henüz video eklenmemiş</div>
+            {% endif %}
+        </div>
+    </aside>
+</div>
+{% endblock %}
