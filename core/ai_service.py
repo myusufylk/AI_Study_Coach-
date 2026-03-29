@@ -17,20 +17,33 @@ def generate_study_program(target_exam, daily_hours):
         client = genai.Client(api_key=settings.GOOGLE_API_KEY)
 
         prompt = f"""
-        Bir öğrenci için haftalık çalışma programı oluştur.
+        Bir öğrenci için haftalık çalışma programı oluştur. 
+        Yanıtı SADECE geçerli bir JSON formatında döndür. Hiçbir açıklama ekleme.
 
         Hedef sınav: {target_exam}
         Günlük çalışma süresi: {daily_hours} saat
 
-        Pazartesi - Pazar şeklinde plan yaz.
+        JSON Şeması:
+        {{
+          "program": [
+            {{"gun": "Gün Adı", "ders": "Ders Adı", "baslangic": "HH:MM", "bitis": "HH:MM"}},
+            ...
+          ]
+        }}
+        
+        Pazartesi, Salı, Çarşamba, Perşembe, Cuma, Cumartesi, Pazar günlerini içermelidir.
+        Saat aralıkları {daily_hours} saati aşmamalıdır.
         """
 
         response = client.models.generate_content(
             model="gemini-2.0-flash",
-            contents=prompt
+            contents=prompt,
+            config={
+                'response_mime_type': 'application/json'
+            }
         )
 
-        return getattr(response, "text", "AI cevap üretemedi.")
+        return response.text
 
     except Exception as e:
         error_str = str(e)

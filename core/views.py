@@ -9,18 +9,23 @@ from django.conf import settings
 from google import genai
 
 from .forms import ProfileForm
-from .models import Profile
+from .models import Profile, StudyPlan
 from .ai_service import generate_study_program
-
 
 def home(request):
     profile = None
+    program = None
 
     if request.user.is_authenticated:
         profile = Profile.objects.filter(user=request.user).first()
-        return render(request, 'dashboard.html', {'profile': profile})
+        latest_plan = StudyPlan.objects.filter(user=request.user).order_by('-created_at').first()
+        if latest_plan:
+            program = latest_plan.plan_content
 
-    return render(request, 'base.html', {'profile': profile})
+    return render(request, 'dashboard.html', {
+        'profile': profile,
+        'program': program
+    })
 
 
 def register_view(request):
@@ -162,6 +167,12 @@ def generate_program(request):
         program = generate_study_program(
             profile.target_exam,
             profile.daily_hours
+        )
+
+        # PLANI KAYDET (Dashboard'da göstermek için)
+        StudyPlan.objects.create(
+            user=request.user,
+            plan_content=program
         )
 
         return render(request, "program.html", {

@@ -3,63 +3,310 @@
 {% block title %}Dashboard - AI Study Coach{% endblock %}
 
 {% block content %}
+<style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .welcome-section {
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .dashboard-grid-top {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .info-card {
+        background: white;
+        padding: 24px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f0f0f0;
+    }
+
+    .info-card h3 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+        color: #1f2937;
+        border-bottom: 2px solid #f3f4f6;
+        padding-bottom: 10px;
+    }
+
+    .info-item {
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        font-size: 1rem;
+    }
+
+    .info-item i {
+        margin-right: 10px;
+    }
+
+    /* Schedule UI Styles */
+    .schedule-grid-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f0f0f0;
+    }
+
+    .schedule-grid {
+        display: flex;
+        min-width: 800px;
+        position: relative;
+        border-left: 1px solid #f3f4f6;
+        border-top: 1px solid #f3f4f6;
+    }
+
+    .time-col {
+        width: 60px;
+        flex-shrink: 0;
+        background: #fafafa;
+        border-right: 1px solid #f3f4f6;
+    }
+
+    .time-slot {
+        height: 60px;
+        border-bottom: 1px solid #f3f4f6;
+        color: #9ca3af;
+        font-size: 0.75rem;
+        text-align: right;
+        padding-right: 8px;
+        padding-top: 4px;
+        box-sizing: border-box;
+    }
+
+    .days-wrapper {
+        display: flex;
+        flex-grow: 1;
+    }
+
+    .day-col {
+        flex: 1;
+        border-right: 1px solid #f3f4f6;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .day-header {
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #374151;
+        background: #f9fafb;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .day-content {
+        position: relative;
+        height: 840px;
+        background-image: linear-gradient(to bottom, #f9fafb 1px, transparent 1px);
+        background-size: 100% 60px;
+    }
+
+    .course-card {
+        position: absolute;
+        left: 4px;
+        right: 4px;
+        border-radius: 8px;
+        padding: 8px;
+        color: white;
+        font-size: 0.8rem;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+        z-index: 5;
+    }
+
+    .course-card:hover {
+        transform: translateY(-2px);
+        z-index: 10;
+        cursor: pointer;
+    }
+
+    .course-title {
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+
+    .btn-generate {
+        display: inline-block;
+        padding: 12px 24px;
+        background: #4f46e5;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+
+    .btn-generate:hover {
+        background: #4338ca;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-grid-top {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
 <div class="dashboard-container">
-    <h2 class="dashboard-welcome">Welcome, {{ user.username }}!</h2>
+    <div class="welcome-section">
+        <h1 style="font-size: 2rem; color: #111827;">Hoş geldin, {{ user.username }} 👋</h1>
+        <p style="color: #6b7280;">Bugün harika bir öğrenme günü!</p>
+    </div>
 
-    <div class="dashboard-grid">
-        <!-- Card 1: Weekly Goals -->
-        <div class="dashboard-card">
-            <h3 class="card-title">Weekly Goals</h3>
-            <div class="card-content" style="flex-direction: column; text-align: center;">
-                <p class="placeholder-text" style="margin-bottom: 15px;">Haftalık çalışma planınızı oluşturun ve
-                    düzenleyin.</p>
-                <a href="{% url 'weekly_goal' %}" class="submit-btn"
-                    style="text-decoration: none; width: auto; padding: 10px 20px;">Hedef Belirle</a>
+    <div class="dashboard-grid-top">
+        <!-- Profil Kartı -->
+        <div class="info-card">
+            <h3>Profil Bilgileri</h3>
+            {% if profile %}
+            <div class="info-item">🎯 <strong>Hedef:</strong> &nbsp; {{ profile.target_exam }}</div>
+            <div class="info-item">⏰ <strong>Günlük:</strong> &nbsp; {{ profile.daily_hours }} saat</div>
+            <div style="margin-top: 15px;">
+                <a href="{% url 'profile' %}" style="color: #4f46e5; font-size: 0.9rem; text-decoration: none;">Profili
+                    Düzenle →</a>
             </div>
+            {% else %}
+            <p style="color: #64748b;">Profil bilgilerini henüz girmedin.</p>
+            <a href="{% url 'profile' %}" class="btn-generate" style="padding: 8px 16px; font-size: 0.9rem;">Profil
+                Oluştur</a>
+            {% endif %}
         </div>
 
-        <!-- Card 2: Course Selection -->
-        <div class="dashboard-card">
-            <h3 class="card-title">Course Selection</h3>
-            <div class="card-content" style="flex-direction: column; text-align: center;">
-                <p class="placeholder-text" style="margin-bottom: 15px;">Çalışmak istediğiniz dersleri belirleyin.</p>
-                <a href="{% url 'subjects' %}" class="submit-btn"
-                    style="text-decoration: none; width: auto; padding: 10px 20px;">Dersleri Seç</a>
-            </div>
-        </div>
-
-        <!-- Card 3: My Schedule -->
-        <div class="dashboard-card">
-            <h3 class="card-title">My Schedule</h3>
-            <div class="card-content"
-                style="flex-direction: column; align-items: flex-start; justify-content: flex-start; padding: 15px; border: none; background-color: transparent;">
-
-                <div
-                    style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 12px; background-color: #f8fafc; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #3b82f6;">
-                    <div style="display: flex; flex-direction: column;">
-                        <span style="font-weight: 600; color: #1e293b; font-size: 14px;">Matematik - Türev</span>
-                        <span style="color: #64748b; font-size: 12px;">Bugün, 14:00 - 15:30</span>
-                    </div>
-                </div>
-
-                <div
-                    style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 12px; background-color: #f8fafc; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #10b981;">
-                    <div style="display: flex; flex-direction: column;">
-                        <span style="font-weight: 600; color: #1e293b; font-size: 14px;">Fizik - Mekanik</span>
-                        <span style="color: #64748b; font-size: 12px;">Yarın, 10:00 - 11:30</span>
-                    </div>
-                </div>
-
-                <div
-                    style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 12px; background-color: #f8fafc; border-radius: 8px; border-left: 4px solid #f59e0b;">
-                    <div style="display: flex; flex-direction: column;">
-                        <span style="font-weight: 600; color: #1e293b; font-size: 14px;">Kimya - Organik</span>
-                        <span style="color: #64748b; font-size: 12px;">Yarın, 16:00 - 17:00</span>
-                    </div>
-                </div>
-
+        <!-- AI Koç & Hızlı Erişim -->
+        <div class="info-card">
+            <h3>AI Çalışma Takvimi</h3>
+            <p style="color: #64748b; margin-bottom: 20px;">
+                Yapay zeka tarafından hazırlanan sana özel haftalık programın.
+                Değişiklik yapmak istersen yeni bir program oluşturabilirsin.
+            </p>
+            <div style="display: flex; gap: 10px;">
+                <a href="{% url 'generate_program' %}" class="btn-generate">Yeni Program Oluştur</a>
+                <a href="{% url 'subjects' %}" class="btn-generate" style="background: #f3f4f6; color: #374151;">Ders
+                    Seçimi</a>
             </div>
         </div>
     </div>
+
+    {% if program %}
+    <!-- Takvim Bölümü -->
+    <div class="schedule-grid-wrapper">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 10px;">
+            <h3 style="margin: 0; color: #111827;">Haftalık Planın</h3>
+            <span style="font-size: 0.85rem; color: #9ca3af;">Her bir kutu AI tarafından hesaplanmıştır</span>
+        </div>
+
+        <div class="schedule-grid">
+            <div class="time-col">
+                <div class="day-header" style="background:#fafafa;"></div>
+                <div class="time-slot">08:00</div>
+                <div class="time-slot">09:00</div>
+                <div class="time-slot">10:00</div>
+                <div class="time-slot">11:00</div>
+                <div class="time-slot">12:00</div>
+                <div class="time-slot">13:00</div>
+                <div class="time-slot">14:00</div>
+                <div class="time-slot">15:00</div>
+                <div class="time-slot">16:00</div>
+                <div class="time-slot">17:00</div>
+                <div class="time-slot">18:00</div>
+                <div class="time-slot">19:00</div>
+                <div class="time-slot">20:00</div>
+                <div class="time-slot">21:00</div>
+                <div class="time-slot" style="border-bottom:none;">22:00</div>
+            </div>
+
+            <div class="days-wrapper">
+                {% for gun in "Pazartesi,Salı,Çarşamba,Perşembe,Cuma,Cumartesi,Pazar"|slice:":" %}
+                {% endfor %}
+                <!-- Gün Kolonlarını Manuel Tanımlıyoruz (Daha güvenli) -->
+                <div class="day-col">
+                    <div class="day-header">Pazartesi</div>
+                    <div class="day-content" id="col-Pazartesi"></div>
+                </div>
+                <div class="day-col">
+                    <div class="day-header">Salı</div>
+                    <div class="day-content" id="col-Salı"></div>
+                </div>
+                <div class="day-col">
+                    <div class="day-header">Çarşamba</div>
+                    <div class="day-content" id="col-Çarşamba"></div>
+                </div>
+                <div class="day-col">
+                    <div class="day-header">Perşembe</div>
+                    <div class="day-content" id="col-Perşembe"></div>
+                </div>
+                <div class="day-col">
+                    <div class="day-header">Cuma</div>
+                    <div class="day-content" id="col-Cuma"></div>
+                </div>
+                <div class="day-col">
+                    <div class="day-header">Cumartesi</div>
+                    <div class="day-content" id="col-Cumartesi"></div>
+                </div>
+                <div class="day-col">
+                    <div class="day-header">Pazar</div>
+                    <div class="day-content" id="col-Pazar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const responseJson = {{ program| safe }};
+        const START_HOUR = 8;
+        const PIXELS_PER_HOUR = 60;
+        const colorPalette = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'];
+
+        function parseTimeString(timeStr) {
+            const parts = timeStr.split(':');
+            return parseInt(parts[0], 10) + (parseInt(parts[1], 10) / 60);
+        }
+
+        function renderActiveSchedule() {
+            if (!responseJson || !responseJson.program) return;
+            responseJson.program.forEach((item, index) => {
+                const columnElement = document.getElementById('col-' + item.gun);
+                if (!columnElement) return;
+                const startFloat = parseTimeString(item.baslangic);
+                const endFloat = parseTimeString(item.bitis);
+                const topPx = (startFloat - START_HOUR) * PIXELS_PER_HOUR;
+                const heightPx = (endFloat - startFloat) * PIXELS_PER_HOUR;
+                const card = document.createElement('div');
+                card.className = 'course-card';
+                card.style.top = `${topPx}px`;
+                card.style.height = `${heightPx}px`;
+                card.style.backgroundColor = colorPalette[index % colorPalette.length];
+                card.innerHTML = `<div class="course-title">${item.ders}</div><div>${item.baslangic} - ${item.bitis}</div>`;
+                columnElement.appendChild(card);
+            });
+        }
+        document.addEventListener('DOMContentLoaded', renderActiveSchedule);
+    </script>
+    {% else %}
+    <div class="info-card" style="text-align: center; padding: 60px;">
+        <h3 style="border: none;">Henüz bir çalışma planın yok!</h3>
+        <p style="color: #64748b; margin-bottom: 25px;">Yapay zekanın sana özel bir program hazırlaması için hemen
+            başla.</p>
+        <a href="{% url 'generate_program' %}" class="btn-generate">İlk Programımı Oluştur</a>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
