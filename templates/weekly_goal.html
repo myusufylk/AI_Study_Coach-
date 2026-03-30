@@ -6,9 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Haftalık Hedef - Eğitim Planlama</title>
-    <!-- Modern Tasarım İçin İnter Fontu -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- CSS Bağlantısı - Django Static ile -->
     <link rel="stylesheet" href="{% static 'css/subjects_style.css' %}">
 </head>
 
@@ -20,11 +18,13 @@
             <p>Hedeflerinizi belirleyerek başarıya ulaşın</p>
         </div>
 
-        <form>
+        <form method="POST" action="{% url 'weekly_goal' %}">
+            {% csrf_token %}
+
             <div class="goals-form-group">
                 <label for="hours_per_day" class="goals-form-label">Günde kaç saat çalışacaksın?</label>
                 <input type="number" id="hours_per_day" name="hours_per_day" class="goals-form-control" min="1" max="24"
-                    placeholder="Örn: 4">
+                    placeholder="Örn: 4" value="{{ profile.daily_hours }}">
             </div>
 
             <div class="goals-form-group">
@@ -50,8 +50,8 @@
 
             <div class="goals-form-group">
                 <label for="goal_note" class="goals-form-label">Not / Hedef açıklaması</label>
-                <textarea id="goal_note" name="goal_note" class="goals-form-control"
-                    placeholder="Bu haftaki temel hedeflerini buraya yazabilirsin..."></textarea>
+                <textarea id="goal_note" name="goal" class="goals-form-control"
+                    placeholder="Bu haftaki temel hedeflerini buraya yazabilirsin...">{{ profile.weekly_goal }}</textarea>
             </div>
 
             <button type="submit" class="goals-btn-submit">Planı Kaydet</button>

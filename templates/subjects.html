@@ -5,9 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ders Seçimi - Eğitim Planlama</title>
-    <!-- Modern Tasarım İçin İnter Fontu -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- CSS Bağlantısı - Django Static ile -->
     <link rel="stylesheet" href="{% static 'css/subjects_style.css' %}">
 </head>
 <body>
@@ -18,7 +16,9 @@
             <p>Çalışmak istediğiniz dersleri belirleyin</p>
         </div>
 
-        <form>
+        <form method="POST">
+            {% csrf_token %}
+            
             <div class="goals-form-group goals-checkbox-list">
                 <label class="goals-checkbox-item">
                     <input type="checkbox" name="subject" value="matematik">

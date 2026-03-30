@@ -113,7 +113,7 @@
 
     .day-content {
         position: relative;
-        height: 840px;
+        height: 900px; /* Saatlerle uyum için 900px yaptık */
         background-image: linear-gradient(to bottom, #f9fafb 1px, transparent 1px);
         background-size: 100% 60px;
     }
@@ -172,24 +172,20 @@
     </div>
 
     <div class="dashboard-grid-top">
-        <!-- Profil Kartı -->
         <div class="info-card">
             <h3>Profil Bilgileri</h3>
             {% if profile %}
             <div class="info-item">🎯 <strong>Hedef:</strong> &nbsp; {{ profile.target_exam }}</div>
             <div class="info-item">⏰ <strong>Günlük:</strong> &nbsp; {{ profile.daily_hours }} saat</div>
             <div style="margin-top: 15px;">
-                <a href="{% url 'profile' %}" style="color: #4f46e5; font-size: 0.9rem; text-decoration: none;">Profili
-                    Düzenle →</a>
+                <a href="{% url 'profile' %}" style="color: #4f46e5; font-size: 0.9rem; text-decoration: none;">Profili Düzenle →</a>
             </div>
             {% else %}
             <p style="color: #64748b;">Profil bilgilerini henüz girmedin.</p>
-            <a href="{% url 'profile' %}" class="btn-generate" style="padding: 8px 16px; font-size: 0.9rem;">Profil
-                Oluştur</a>
+            <a href="{% url 'profile' %}" class="btn-generate" style="padding: 8px 16px; font-size: 0.9rem;">Profil Oluştur</a>
             {% endif %}
         </div>
 
-        <!-- AI Koç & Hızlı Erişim -->
         <div class="info-card">
             <h3>AI Çalışma Takvimi</h3>
             <p style="color: #64748b; margin-bottom: 20px;">
@@ -198,19 +194,16 @@
             </p>
             <div style="display: flex; gap: 10px;">
                 <a href="{% url 'generate_program' %}" class="btn-generate">Yeni Program Oluştur</a>
-                <a href="{% url 'subjects' %}" class="btn-generate" style="background: #f3f4f6; color: #374151;">Ders
-                    Seçimi</a>
+                <a href="{% url 'subjects' %}" class="btn-generate" style="background: #f3f4f6; color: #374151;">Ders Seçimi</a>
             </div>
         </div>
     </div>
 
     {% if program %}
-    <!-- Takvim Bölümü -->
     <div class="schedule-grid-wrapper">
-        <div
-            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 10px;">
             <h3 style="margin: 0; color: #111827;">Haftalık Planın</h3>
-            <span style="font-size: 0.85rem; color: #9ca3af;">Her bir kutu AI tarafından hesaplanmıştır</span>
+            <span style="font-size: 0.85rem; color: #9ca3af;">AI Planlama Aktif</span>
         </div>
 
         <div class="schedule-grid">
@@ -234,9 +227,6 @@
             </div>
 
             <div class="days-wrapper">
-                {% for gun in "Pazartesi,Salı,Çarşamba,Perşembe,Cuma,Cumartesi,Pazar"|slice:":" %}
-                {% endfor %}
-                <!-- Gün Kolonlarını Manuel Tanımlıyoruz (Daha güvenli) -->
                 <div class="day-col">
                     <div class="day-header">Pazartesi</div>
                     <div class="day-content" id="col-Pazartesi"></div>
@@ -270,7 +260,14 @@
     </div>
 
     <script>
-        const responseJson = {{ program| safe }};
+        // AI'dan gelen veriyi güvenli okuma |safe filtresi hayati önem taşır
+        let responseJson;
+        try {
+            responseJson = {{ program|safe }};
+        } catch (e) {
+            console.error("JSON Hatası:", e);
+        }
+
         const START_HOUR = 8;
         const PIXELS_PER_HOUR = 60;
         const colorPalette = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'];
@@ -281,20 +278,27 @@
         }
 
         function renderActiveSchedule() {
-            if (!responseJson || !responseJson.program) return;
+            if (!responseJson || !responseJson.program) {
+                console.warn("Çizilecek program verisi eksik.");
+                return;
+            }
+            
             responseJson.program.forEach((item, index) => {
                 const columnElement = document.getElementById('col-' + item.gun);
                 if (!columnElement) return;
+
                 const startFloat = parseTimeString(item.baslangic);
                 const endFloat = parseTimeString(item.bitis);
                 const topPx = (startFloat - START_HOUR) * PIXELS_PER_HOUR;
                 const heightPx = (endFloat - startFloat) * PIXELS_PER_HOUR;
+
                 const card = document.createElement('div');
                 card.className = 'course-card';
                 card.style.top = `${topPx}px`;
                 card.style.height = `${heightPx}px`;
                 card.style.backgroundColor = colorPalette[index % colorPalette.length];
                 card.innerHTML = `<div class="course-title">${item.ders}</div><div>${item.baslangic} - ${item.bitis}</div>`;
+                
                 columnElement.appendChild(card);
             });
         }
@@ -303,8 +307,7 @@
     {% else %}
     <div class="info-card" style="text-align: center; padding: 60px;">
         <h3 style="border: none;">Henüz bir çalışma planın yok!</h3>
-        <p style="color: #64748b; margin-bottom: 25px;">Yapay zekanın sana özel bir program hazırlaması için hemen
-            başla.</p>
+        <p style="color: #64748b; margin-bottom: 25px;">Yapay zekanın sana özel bir program hazırlaması için hemen başla.</p>
         <a href="{% url 'generate_program' %}" class="btn-generate">İlk Programımı Oluştur</a>
     </div>
     {% endif %}
