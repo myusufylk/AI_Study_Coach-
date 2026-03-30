@@ -104,14 +104,20 @@ def profile_view(request):
 # --- DERS SEÇİMİ ---
 @login_required
 def subjects_view(request):
-    profile, created = Profile.objects.get_or_create(user=request.user)
-    
+
     if request.method == "POST":
-        selected_subjects = request.POST.getlist('subjects')
-        profile.selected_courses.set(selected_subjects)
-        profile.save()
-        messages.success(request, "Dersleriniz başarıyla kaydedildi!")
-        return redirect('home')
+        selected_subjects = request.POST.getlist('subject')
+        try:
+            profile = Profile.objects.get(user=request.user)
+            profile.selected_subjects = ",".join(selected_subjects)
+            profile.save()
+            messages.success(request, "Ders seçimleriniz başarıyla kaydedildi!")
+            return redirect('home')
+        except Profile.DoesNotExist:
+            messages.error(request, "Lütfen önce profil oluşturun.")
+            return redirect('profile')
+            
+    return render(request, 'subjects.html')
 
     all_courses = Course.objects.all()
     # Şablonda hangilerinin seçili olduğunu bilmek için ID listesi gönderiyoruz
@@ -123,17 +129,36 @@ def subjects_view(request):
         'selected_subjects': selected_ids
     })
 
-# --- HAFTALIK HEDEF ---
+# --- HAFTALIK HEDEF
 @login_required
 def weekly_goal_view(request):
-    profile = request.user.profile
+
     if request.method == "POST":
-        user_goal = request.POST.get('goal') 
-        profile.weekly_goal = user_goal
-        profile.save()
-        messages.success(request, "Hedefin kaydedildi!")
-        return redirect('home')
-    return render(request, 'weekly_goal.html', {'profile': profile})
+        hours = request.POST.get('hours_per_day')
+        days = request.POST.get('days_per_week')
+        priority = request.POST.get('priority_subject')
+        note = request.POST.get('goal_note')
+        
+        try:
+            profile = Profile.objects.get(user=request.user)
+            if hours:
+                profile.daily_hours = int(hours)
+            if days:
+                profile.weekly_study_days = int(days)
+            if priority:
+                profile.priority_subject = priority
+            if note:
+                profile.weekly_goal_note = note
+                
+            profile.save()
+            messages.success(request, "Haftalık hedefiniz başarıyla kaydedildi!")
+            return redirect('home')
+        except Profile.DoesNotExist:
+            messages.error(request, "Lütfen önce profil oluşturun.")
+            return redirect('profile')
+
+    return render(request, 'weekly_goal.html')
+
 
 # --- AI SERVİSLERİ ---
 @login_required
@@ -177,5 +202,21 @@ def generate_program(request):
         messages.error(request, "Önce profil bilgilerini doldurmalısın.")
         return redirect("profile")
     except Exception as e:
-        messages.error(request, f"Teknik hata: {str(e)}")
+
+        messages.error(request, f"Program oluşturulurken hata oluştu: {str(e)}")
         return redirect("home")
+
+@login_required
+def lesson_watch(request):
+    # Dummy veriler ile arayüzün çalışması sağlanır
+    context = {
+        'lesson': {'name': 'Matematik'},
+        'topic': {'title': 'Türev - Kurallar'},
+        'video': {'url': 'https://www.youtube.com/embed/dQw4w9WgXcQ', 'id': 1},
+        'videos': [
+            {'id': 1, 'title': 'Türev Nedir?', 'duration': '10:05'},
+            {'id': 2, 'title': 'Çarpım Kuralı', 'duration': '12:30'},
+            {'id': 3, 'title': 'Bölüm Kuralı', 'duration': '15:45'}
+        ]
+    }
+    return render(request, 'lesson_watch.html', context)

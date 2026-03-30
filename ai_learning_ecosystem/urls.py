@@ -35,4 +35,7 @@ urlpatterns = [
     # AI koç sayfası
     path('ai-coach/', views.ai_coach_view, name='ai_coach'),
 
+    # Ders İzleme sayfası
+    path('lesson_watch/', views.lesson_watch, name='lesson_watch'),
+
 ]
