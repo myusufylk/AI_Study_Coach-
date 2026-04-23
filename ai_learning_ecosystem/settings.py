@@ -1,6 +1,9 @@
 from pathlib import Path
 import os
 import mimetypes # CSS tasarımı için kritik
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # Proje yollarını otomatik algılar
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -79,4 +82,4 @@ STATICFILES_DIRS = [BASE_DIR / 'static'] # Tasarımı bulması için yolu sabitl
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/login/'
-GOOGLE_API_KEY = "AIzaSyBJXNG9StOtn64m0MDajVlcAeQk7SiQFLQ"
+GOOGLE_API_KEY = "AIzaSyCA-WR9HMmZDiMBDrAfy0FAa2cQOYuksO0"

@@ -6,15 +6,12 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 
-import google.generativeai as genai
+from google import genai
 
 # Form ve Modeller
 from .forms import ProfileForm
 from .models import Profile, StudyPlan, Course
 from .ai_service import generate_study_program
-
-# Gemini Yapılandırması
-genai.configure(api_key=settings.GOOGLE_API_KEY)
 
 # --- ANA SAYFA ---
 def home(request):
@@ -169,8 +166,12 @@ def ai_coach_view(request):
         full_prompt = f"Sen bir eğitim koçusun. İsmin AI Study Coach. Öğrencinin sorusu: {user_query}"
 
         try:
-            model = genai.GenerativeModel('gemini-2.0-flash')
-            ai_response = model.generate_content(full_prompt)
+            # YENİ KULLANIM: Artık Client üzerinden istek atıyoruz
+            client = genai.Client(api_key=settings.GOOGLE_API_KEY)
+            ai_response = client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=full_prompt
+            )
             response_text = ai_response.text
         except Exception as e:
             response_text = f"AI cevap üretirken bir hata oluştu: {str(e)}"
@@ -187,7 +188,6 @@ def generate_program(request):
             messages.error(request, f"AI Programı oluşturamadı: {program}")
             return redirect("home")
 
-        StudyPlan.objects.filter(request.user == user).delete() # Yanlış filtreyi düzelttim
         StudyPlan.objects.filter(user=request.user).delete()
 
         StudyPlan.objects.create(
