@@ -8,58 +8,51 @@
     <title>{% block title %}AI Study Coach{% endblock %}</title>
 
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
+    <!-- ── NAVBAR ──────────────────────────────────────────────────── -->
     <header class="navbar">
+        <div class="navbar-inner">
+            <a href="{% url 'home' %}" class="logo">
+                <span class="logo-icon">📚</span>
+                <span class="logo-text">AI Study Coach</span>
+            </a>
 
-        <div class="logo">
-            AI Study Coach
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="{% url 'home' %}" class="nav-link">Ana Sayfa</a></li>
+                    {% if user.is_authenticated %}
+                    <li><a href="{% url 'profile' %}" class="nav-link">Profil</a></li>
+                    <li><a href="{% url 'subjects' %}" class="nav-link">Dersler</a></li>
+                    <li><a href="{% url 'weekly_goal' %}" class="nav-link">Haftalık Hedef</a></li>
+                    <li><a href="{% url 'ai_coach' %}" class="nav-link nav-link--accent">✨ AI Koç</a></li>
+                    <li><a href="{% url 'logout' %}" class="nav-link nav-link--muted">Çıkış</a></li>
+                    {% else %}
+                    <li><a href="{% url 'login' %}" class="nav-link">Giriş Yap</a></li>
+                    <li><a href="{% url 'register' %}" class="nav-link nav-link--accent">Kayıt Ol</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
         </div>
-
-        <nav>
-            <ul class="nav-links">
-
-                <li><a href="{% url 'home' %}">Ana Sayfa</a></li>
-
-                {% if user.is_authenticated %}
-
-                <li><a href="{% url 'profile' %}">Profil</a></li>
-                <li><a href="{% url 'subjects' %}">Dersler</a></li>
-                <li><a href="{% url 'weekly_goal' %}">Haftalık Hedef</a></li>
-                <li><a href="{% url 'ai_coach' %}">AI Koç</a></li>
-
-                <li><a href="{% url 'logout' %}">Çıkış Yap</a></li>
-
-                {% else %}
-
-                <li><a href="{% url 'login' %}">Giriş Yap</a></li>
-                <li><a href="{% url 'register' %}">Kayıt Ol</a></li>
-
-                {% endif %}
-
-            </ul>
-        </nav>
-
     </header>
 
-
+    <!-- ── MAIN CONTENT ───────────────────────────────────────────── -->
     <main class="content">
 
         {% if messages %}
-        <div class="container mt-3">
+        <div class="toast-container">
             {% for message in messages %}
-            <div style="
-                    background:#dbeafe;
-                    color:#1e40af;
-                    padding:15px;
-                    border-radius:10px;
-                    margin-bottom:20px;
-                    text-align:center;">
-                {{ message }}
+            <div class="toast toast--{{ message.tags|default:'info' }}">
+                <span class="toast-icon">
+                    {% if message.tags == 'success' %}✅
+                    {% elif message.tags == 'error' %}❌
+                    {% elif message.tags == 'warning' %}⚠️
+                    {% else %}ℹ️{% endif %}
+                </span>
+                <span class="toast-text">{{ message }}</span>
             </div>
             {% endfor %}
         </div>
@@ -70,18 +63,24 @@
 
     </main>
 
-
-    <footer class="footer" style="
-        padding:20px;
-        text-align:center;
-        color:#9ca3af;
-        font-size:14px;">
-
-        <p>
-            © 2026 AI Study Coach. Tüm hakları saklıdır.
-        </p>
-
+    <!-- ── FOOTER ─────────────────────────────────────────────────── -->
+    <footer class="site-footer">
+        <p>© 2026 AI Study Coach — Yapay zeka destekli kişisel eğitim asistanın.</p>
     </footer>
+
+    <!-- Toast auto-dismiss -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toasts = document.querySelectorAll('.toast');
+            toasts.forEach(function (toast, i) {
+                setTimeout(function () {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(-12px)';
+                    setTimeout(function () { toast.remove(); }, 400);
+                }, 4000 + i * 600);
+            });
+        });
+    </script>
 
 </body>
 

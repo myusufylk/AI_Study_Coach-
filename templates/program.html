@@ -1,162 +1,29 @@
 {% extends "base.html" %}
 
+{% block title %}Haftalık Program — AI Study Coach{% endblock %}
+
 {% block content %}
 
-<!-- DASHBOARD SCHEDULE V1.0 -->
-<style>
-    /* Temel Konteyner Ayarları */
-    .schedule-container {
-        max-width: 1200px;
-        margin: 2rem auto;
-        background: #ffffff;
-        border-radius: 16px;
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
-        border: 1px solid #f0f0f0;
-        padding: 24px;
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    }
+<div class="schedule-page-container">
 
-    .schedule-header {
-        margin-bottom: 24px;
-        padding-bottom: 16px;
-        border-bottom: 1px solid #f0f0f0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .schedule-header h2 {
-        margin: 0;
-        color: #111827;
-        font-size: 1.5rem;
-        font-weight: 600;
-    }
-
-    .schedule-header p {
-        margin: 4px 0 0 0;
-        color: #6b7280;
-        font-size: 0.95rem;
-    }
-
-    /* Grid ve Scroll (Mobil Uyum İçin) */
-    .schedule-grid-wrapper {
-        width: 100%;
-        overflow-x: auto; /* Mobilde yatay kaydırma sağlar */
-    }
-
-    .schedule-grid {
-        display: flex;
-        min-width: 800px; /* Mobilde kolonların çok ezilmemesi için minimum genişlik */
-        position: relative;
-        border-left: 1px solid #f3f4f6;
-        border-top: 1px solid #f3f4f6;
-    }
-
-    /* Saatlerin Yazdığı Sol Kolon */
-    .time-col {
-        width: 60px;
-        flex-shrink: 0;
-        background: #fafafa;
-        border-right: 1px solid #f3f4f6;
-    }
-
-    .time-slot {
-        height: 60px; /* Her saat aralığı 60px */
-        border-bottom: 1px solid #f3f4f6;
-        color: #9ca3af;
-        font-size: 0.75rem;
-        font-weight: 500;
-        text-align: right;
-        padding-right: 8px;
-        padding-top: 4px;
-        box-sizing: border-box;
-    }
-
-    /* Günlerin Bulunduğu Sarıcı */
-    .days-wrapper {
-        display: flex;
-        flex-grow: 1;
-    }
-
-    .day-col {
-        flex: 1;
-        border-right: 1px solid #f3f4f6;
-        display: flex;
-        flex-direction: column;
-    }
-
-    /* Gün Başlıkları (Pazartesi, Salı vb.) */
-    .day-header {
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        font-size: 0.85rem;
-        color: #374151;
-        background: #f9fafb;
-        border-bottom: 1px solid #f3f4f6;
-    }
-
-    /* Toplam Liste Uzunluğu (08:00'den 22:00'ye kadar 14 Saat * 60px = 840px) */
-    .day-content {
-        position: relative;
-        height: 840px; 
-        background-image: linear-gradient(to bottom, #f9fafb 1px, transparent 1px);
-        background-size: 100% 60px; /* Arka plandaki modern ince çizgiler */
-    }
-
-    /* Eklenen Ders Kartı Yapısı */
-    .course-card {
-        position: absolute;
-        left: 4px;
-        right: 4px;
-        border-radius: 8px;
-        padding: 8px 10px;
-        color: white;
-        font-size: 0.8rem;
-        overflow: hidden;
-        box-sizing: border-box;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        z-index: 5;
-    }
-
-    .course-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-        z-index: 10;
-    }
-
-    .course-title {
-        font-weight: 600;
-        margin-bottom: 4px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .course-time-text {
-        font-size: 0.7rem;
-        opacity: 0.9;
-    }
-</style>
-
-<div class="schedule-container">
-    <div class="schedule-header">
+    <!-- ── Header ─────────────────────────────────────────────────── -->
+    <div class="schedule-page-header">
         <div>
-            <h2>AI Haftalık Ders Programı</h2>
-            <p>Kişiselleştirilmiş çalışma planınız</p>
+            <h2 class="schedule-page-title">AI Haftalık Ders Programı</h2>
+            <p class="schedule-page-subtitle">Kişiselleştirilmiş çalışma planınız</p>
         </div>
-        <a href="{% url 'profile' %}" class="btn btn-sm btn-outline-primary">Profili Güncelle</a>
+        <a href="{% url 'profile' %}" class="btn-secondary">
+            Profili Güncelle
+        </a>
     </div>
 
+    <!-- ── Schedule Grid ──────────────────────────────────────────── -->
     <div class="schedule-grid-wrapper">
         <div class="schedule-grid">
-            
-            <!-- Saat Etiketleri Kolonu -->
+
+            <!-- Time Column -->
             <div class="time-col">
-                <div class="day-header" style="background:#fafafa;"></div> <!-- Boş köşe -->
+                <div class="day-header" style="background:#fafafa;"></div>
                 <div class="time-slot">08:00</div>
                 <div class="time-slot">09:00</div>
                 <div class="time-slot">10:00</div>
@@ -174,14 +41,8 @@
                 <div class="time-slot" style="border-bottom:none;">22:00</div>
             </div>
 
-            <!-- Günler Kolonları -->
+            <!-- Day Columns -->
             <div class="days-wrapper">
-                {% for gun in "Pazartesi,Salı,Çarşamba,Perşembe,Cuma,Cumartesi,Pazar"|slice:"," %}
-                <div class="day-col">
-                    <div class="day-header">{{ gun }}</div>
-                    <div class="day-content" id="col-{{ gun }}"></div>
-                </div>
-                {% endfor %}
                 <div class="day-col">
                     <div class="day-header">Pazartesi</div>
                     <div class="day-content" id="col-Pazartesi"></div>
@@ -217,47 +78,52 @@
 </div>
 
 <script>
-    // Backend'den gelen program verisi strings'den objeye çevrilir
     const responseJson = {{ program|safe }};
-
-    // Takvim Ayarları
-    const START_HOUR = 8; // Takvim 08:00'de başlar
-    const PIXELS_PER_HOUR = 60; // 1 saat = 60 piksel
+    const START_HOUR = 8;
+    const PIXELS_PER_HOUR = 60;
+    const colorPalette = [
+        '#6366f1', '#10b981', '#f59e0b', '#ef4444',
+        '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6'
+    ];
 
     function parseTimeString(timeStr) {
         const parts = timeStr.split(':');
-        const hours = parseInt(parts[0], 10);
-        const minutes = parseInt(parts[1], 10);
-        return hours + (minutes / 60);
+        return parseInt(parts[0], 10) + (parseInt(parts[1], 10) / 60);
     }
-
-    const colorPalette = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'];
 
     function renderActiveSchedule() {
         if (!responseJson || !responseJson.program) return;
 
-        const programArray = responseJson.program;
+        const lessonColors = {};
+        let colorIndex = 0;
 
-        programArray.forEach((item, index) => {
+        responseJson.program.forEach(function (item) {
             const columnElement = document.getElementById('col-' + item.gun);
             if (!columnElement) return;
 
+            if (!(item.ders in lessonColors)) {
+                lessonColors[item.ders] = colorPalette[colorIndex % colorPalette.length];
+                colorIndex++;
+            }
+
             const startFloat = parseTimeString(item.baslangic);
             const endFloat = parseTimeString(item.bitis);
-
             const topPx = (startFloat - START_HOUR) * PIXELS_PER_HOUR;
             const heightPx = (endFloat - startFloat) * PIXELS_PER_HOUR;
 
             const card = document.createElement('div');
             card.className = 'course-card';
-            card.style.top = `${topPx}px`;
-            card.style.height = `${heightPx}px`;
-            card.style.backgroundColor = colorPalette[index % colorPalette.length];
+            card.style.top = topPx + 'px';
+            card.style.height = heightPx + 'px';
+            card.style.backgroundColor = lessonColors[item.ders];
 
-            card.innerHTML = `
-                <div class="course-title" title="${item.ders}">${item.ders}</div>
-                <div class="course-time-text">${item.baslangic} - ${item.bitis}</div>
-            `;
+            if (item.konu) {
+                card.title = item.konu + (item.tavsiye ? '\n💡 ' + item.tavsiye : '');
+            }
+
+            card.innerHTML =
+                '<div class="course-title" title="' + item.ders + '">' + item.ders + '</div>' +
+                '<div class="course-time-text">' + item.baslangic + ' - ' + item.bitis + '</div>';
 
             columnElement.appendChild(card);
         });
@@ -265,4 +131,5 @@
 
     document.addEventListener('DOMContentLoaded', renderActiveSchedule);
 </script>
+
 {% endblock %}

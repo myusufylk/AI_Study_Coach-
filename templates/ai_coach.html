@@ -1,39 +1,65 @@
 {% extends "base.html" %}
 
-{% block title %}AI Coach{% endblock %}
+{% block title %}AI Koç — AI Study Coach{% endblock %}
 
 {% block content %}
 
-<div class="form-container">
-    <div class="form-box" style="max-width:700px;">
+<div class="coach-page">
 
-        <h2>🤖 AI Study Coach</h2>
+    <!-- ── Hero Header ────────────────────────────────────────────── -->
+    <div class="coach-hero">
+        <div class="coach-hero-icon">🤖</div>
+        <h1 class="coach-hero-title">AI Study Coach</h1>
+        <p class="coach-hero-subtitle">
+            Sınav hazırlığı, ders programı, motivasyon… Aklına ne gelirse sor!
+        </p>
+    </div>
 
-        <form method="POST">
+    <!-- ── Question Form ──────────────────────────────────────────── -->
+    <div class="coach-card">
+        <form method="POST" class="coach-form">
             {% csrf_token %}
 
-            <textarea 
+            <label for="user_query" class="coach-label">Sorunuzu yazın</label>
+            <textarea
+                id="user_query"
                 name="user_query"
-                placeholder="Çalışma ile ilgili sorunu yaz..."
-                style="width:100%; height:120px; margin-top:15px;">
-            </textarea>
+                class="coach-textarea"
+                rows="5"
+                placeholder="Örn: Matematik dersinde türev konusunu nasıl daha iyi anlayabilirim?"
+            >{% if request.POST.user_query %}{{ request.POST.user_query }}{% endif %}</textarea>
 
-            <br><br>
-
-            <button type="submit">
-                Sor
+            <button type="submit" class="coach-submit-btn">
+                <span class="coach-submit-icon">✨</span>
+                Koça Sor
             </button>
-
         </form>
-
-        {% if response %}
-        <div style="margin-top:25px;">
-            <h3>AI Cevabı</h3>
-            <p>{{ response }}</p>
-        </div>
-        {% endif %}
-
     </div>
+
+    <!-- ── AI Response ────────────────────────────────────────────── -->
+    {% if response %}
+    <div class="coach-response-card">
+        <div class="coach-response-header">
+            <div class="coach-avatar">🧠</div>
+            <div>
+                <div class="coach-response-name">AI Study Coach</div>
+                <div class="coach-response-badge">Yapay Zeka Eğitim Koçu</div>
+            </div>
+        </div>
+
+        <div class="coach-response-divider"></div>
+
+        <div class="coach-response-body">
+            {{ response|linebreaksbr }}
+        </div>
+
+        <div class="coach-response-footer">
+            <span>💡</span>
+            <span>Bu yanıt yapay zeka tarafından üretilmiştir. Bilgileri doğrulamanızı öneriyoruz.</span>
+        </div>
+    </div>
+    {% endif %}
+
 </div>
 
 {% endblock %}
