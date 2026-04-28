@@ -56,6 +56,8 @@ Designed with clean architecture and a robust, modern, responsive UI.
 
 ### Dashboard
 ![Dashboard](screenshots/dashboard.png)
+<img width="1850" height="925" alt="image" src="https://github.com/user-attachments/assets/5ca1beb7-9f85-43a0-bc99-712579245dd5" />
+
 
 ### Generated Weekly Study Plan
 ![Weekly Plan](screenshots/weekly-plan.png)
