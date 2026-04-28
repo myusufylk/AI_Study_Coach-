@@ -1,10 +1,4 @@
-"""
-AI Service Layer — Gemini API iletişiminin tek noktası.
 
-Tüm AI çağrıları bu modülden geçer. Views katmanında hiçbir
-API / SDK kodu bulunmaz. Her public fonksiyon güvenli bir string
-döner ve asla exception fırlatmaz.
-"""
 
 import json
 import logging
@@ -14,9 +8,6 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Sabitler
-# ─────────────────────────────────────────────────────────────────────────────
 _MODEL_NAME = "gemini-2.5-flash"
 
 _ERROR_QUOTA = "API kota limitiniz doldu. Lütfen bir süre bekleyip tekrar deneyin."
@@ -31,10 +22,6 @@ _ERROR_NO_KEY = (
     "AI servisi şu an kullanılamıyor. Lütfen yöneticiyle iletişime geçin."
 )
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Private yardımcılar
-# ─────────────────────────────────────────────────────────────────────────────
 def _get_api_key():
     """Settings'ten API anahtarını doğrulayarak döner; yoksa None."""
     key = getattr(settings, "GOOGLE_API_KEY", None)
@@ -75,10 +62,6 @@ def _classify_api_error(error):
 
     return _ERROR_UNKNOWN
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Public API
-# ─────────────────────────────────────────────────────────────────────────────
 def ask_ai_coach(user_query):
     """
     AI Study Coach'a soru sorar.

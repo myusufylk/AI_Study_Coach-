@@ -82,4 +82,4 @@ STATICFILES_DIRS = [BASE_DIR / 'static'] # Tasarımı bulması için yolu sabitl
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/login/'
-GOOGLE_API_KEY = "AIzaSyCA-WR9HMmZDiMBDrAfy0FAa2cQOYuksO0"
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
