@@ -59,20 +59,20 @@ Designed with clean architecture and a robust, modern, responsive UI.
 <img width="1850" height="925" alt="image" src="https://github.com/user-attachments/assets/5ca1beb7-9f85-43a0-bc99-712579245dd5" />
 
 
-### Generated Weekly Study Plan
-![Weekly Plan](screenshots/weekly-plan.png)
-
 ### AI Coach Chat
 ![AI Coach](screenshots/ai-coach.png)
+<img width="1851" height="927" alt="image" src="https://github.com/user-attachments/assets/c75fbc54-3cf2-47c4-9fb7-1efa342adc40" />
 
-### Profile Settings
-![Profile](screenshots/profile.png)
 
 ### Subject Selection
 ![Subject Selection](screenshots/subjects.png)
+<img width="1832" height="925" alt="image" src="https://github.com/user-attachments/assets/49f58355-4252-44a3-b843-abf184dde593" />
+
 
 ### Weekly Goal Form
 ![Weekly Goal](screenshots/weekly-goal.png)
+<img width="1831" height="919" alt="image" src="https://github.com/user-attachments/assets/d3dc4fd7-6e5a-40d0-9aa5-32d850a73444" />
+
 
 ---
 
