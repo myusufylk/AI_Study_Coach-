@@ -44,7 +44,7 @@ Designed with clean architecture and a robust, modern, responsive UI.
 - **Python 3.10+**
 - **Django 5.x** — Core framework, ORM, Auth, and templating.
 - **Google GenAI SDK** — Direct integration with the Gemini family of models.
-- **SQLite** — Lightweight local DB (easily swappable to PostgreSQL for production).
+- **Microsoft SQL Server** — A powerful database used in large-scale, real-world projects (can be replaced with simpler systems if needed).
 
 ### Frontend
 - **Vanilla CSS (Variables & Flexbox/Grid)** — No tailwind/bootstrap dependencies. Pure, lightweight performance.
@@ -54,12 +54,23 @@ Designed with clean architecture and a robust, modern, responsive UI.
 
 ## 📸 Screenshots
 
-> **Note:** *(Replace placeholders with actual project screenshots)*
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
 
-| Dashboard & Weekly Calendar | AI Chat Interface |
-| :---: | :---: |
-| <img src="https://via.placeholder.com/400x250?text=Dashboard+Screenshot" alt="Dashboard View"> | <img src="https://via.placeholder.com/400x250?text=AI+Coach+Screenshot" alt="AI Coach Interface"> |
-| *Dynamic color-coded 7-day schedule with topic-level tooltips.* | *Conversational interface receiving structured pedagogical advice.* |
+### Generated Weekly Study Plan
+![Weekly Plan](screenshots/weekly-plan.png)
+
+### AI Coach Chat
+![AI Coach](screenshots/ai-coach.png)
+
+### Profile Settings
+![Profile](screenshots/profile.png)
+
+### Subject Selection
+![Subject Selection](screenshots/subjects.png)
+
+### Weekly Goal Form
+![Weekly Goal](screenshots/weekly-goal.png)
 
 ---
 
@@ -113,10 +124,18 @@ Navigate to `http://localhost:8000` to access the application.
 
 ## 🏗️ Architecture Highlight: `ai_service.py`
 
-To ensure robust exception handling and template modularity, the Gemini calls are thoroughly abstracted:
-- **`ask_ai_coach(query)`**: Validates formatting constraints.
-- **`generate_study_program(hours, exam)`**: Forces the AI into a strict JSON output matching our frontend's custom Grid parser (`baslangic`, `bitis`, `ders`, `konu`, `tavsiye`).
-- Catch blocks map directly to user-friendly UI toasts rather than throwing server 500s.
+In this project, I separated the AI-related code into `ai_service.py`.  
+I did this because I did not want the Django views to become too crowded.
+
+This file mainly handles the communication with Gemini AI.
+
+- `ask_ai_coach(user_query)` is used for the AI coach chat.
+- `generate_study_program(target_exam, daily_hours)` creates a weekly study plan for the student.
+- The weekly plan is returned in JSON format so it can be used easily in the dashboard.
+- If the API key is missing, the quota is exceeded, or Gemini returns an empty response, the error is handled here.
+- Instead of showing technical errors to the user, the app shows simpler messages.
+
+Thanks to this structure, the project is easier to read, debug, and improve later.
 
 ---
 
