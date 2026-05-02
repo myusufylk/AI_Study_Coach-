@@ -4,7 +4,7 @@
   <p><strong>Your Personalized, AI-Powered Pedagogical Assistant & Study Planner</strong></p>
   
   [![Django](https://img.shields.io/badge/Django-5.0+-092E20?style=for-the-badge&logo=django)](https://www.djangoproject.com/)
-  [![Gemini](https://img.shields.io/badge/Gemini_API-Google-4285F4?style=for-the-badge&logo=google)](https://aistudio.google.com/)
+  [![Grok](https://img.shields.io/badge/xAI_Grok-API-000000?style=for-the-badge&logo=x)](https://console.x.ai/)
   [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 </div>
 
@@ -12,7 +12,7 @@
 
 ## 📖 Overview
 
-**AI Study Coach** is a production-ready, full-stack web application designed to help students optimize their learning journey. Powered by Django and Google's advanced **Gemini AI**, it serves two primary functions:
+**AI Study Coach** is a production-ready, full-stack web application designed to help students optimize their learning journey. Powered by Django and xAI's advanced **Grok AI**, it serves two primary functions:
 1. **Intelligent Schedule Engine**: Automatically generates a biologically-optimized, 7-day study curriculum tailored precisely to the user's available time, target exams, and pedagogical best practices.
 2. **Empathetic AI Companion**: A conversational coach interface that provides motivational guidance, study strategies, and structured advice for academic hurdles.
 
@@ -23,7 +23,7 @@ Designed with clean architecture and a robust, modern, responsive UI.
 ## ✨ Features
 
 - **🧠 Algorithmic Study Generation**
-  - Converts user inputs (target exam, daily hours, subjects) into strict JSON schema using Gemini prompts.
+  - Converts user inputs (target exam, daily hours, subjects) into strict JSON schema using Grok prompts.
   - Automatically handles cognitive load balancing (e.g., hard subjects in the morning, memory-retention subjects in the afternoon).
   - Enforces strict constraints like maximum block durations and mandatory screen-breaks (`Mola`).
 - **💬 Empathetic AI Mentorship**
@@ -43,7 +43,7 @@ Designed with clean architecture and a robust, modern, responsive UI.
 ### Core & Backend
 - **Python 3.10+**
 - **Django 5.x** — Core framework, ORM, Auth, and templating.
-- **Google GenAI SDK** — Direct integration with the Gemini family of models.
+- **OpenAI SDK** — Direct integration with the xAI Grok family of models.
 - **Microsoft SQL Server** — A powerful database used in large-scale, real-world projects (can be replaced with simpler systems if needed).
 
 ### Frontend
@@ -100,16 +100,16 @@ source venv/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
-*(Ensure `google-genai` and `django` are explicitly installed).*
+*(Ensure `openai` and `django` are explicitly installed).*
 
 ### 4. Provide your API Key
-The application expects a Google Gemini API key. Set it in your environment:
+The application expects an xAI API key. Set it in your environment:
 ```bash
 # Windows (PowerShell)
-$env:GOOGLE_API_KEY="your_api_key_here"
+$env:XAI_API_KEY="your_api_key_here"
 
 # macOS/Linux
-export GOOGLE_API_KEY="your_api_key_here"
+export XAI_API_KEY="your_api_key_here"
 ```
 *(Alternatively, insert it into your `.env` or Django `settings.py` if configured).*
 
@@ -129,12 +129,12 @@ Navigate to `http://localhost:8000` to access the application.
 In this project, I separated the AI-related code into `ai_service.py`.  
 I did this because I did not want the Django views to become too crowded.
 
-This file mainly handles the communication with Gemini AI.
+This file mainly handles the communication with xAI Grok.
 
 - `ask_ai_coach(user_query)` is used for the AI coach chat.
 - `generate_study_program(target_exam, daily_hours)` creates a weekly study plan for the student.
 - The weekly plan is returned in JSON format so it can be used easily in the dashboard.
-- If the API key is missing, the quota is exceeded, or Gemini returns an empty response, the error is handled here.
+- If the API key is missing, the quota is exceeded, or xAI Grok returns an empty response, the error is handled here.
 - Instead of showing technical errors to the user, the app shows simpler messages.
 
 Thanks to this structure, the project is easier to read, debug, and improve later.

@@ -1,14 +1,19 @@
+"""
+AI Service — Google Gemini API entegrasyonu
 
+Tüm AI mantığı (program oluşturma, soru yanıtlama) Gemini modeli üzerinden çalışır.
+"""
 
 import json
 import logging
 
-from google import genai
+import google.generativeai as genai
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-_MODEL_NAME = "gemini-2.5-flash"
+# Google Gemini tarafından desteklenen modeller
+_MODEL_NAME = "gemini-2.5-flash"  # Hızlı ve verimli model
 
 _ERROR_QUOTA = "API kota limitiniz doldu. Lütfen bir süre bekleyip tekrar deneyin."
 _ERROR_AUTH = "API anahtarı geçersiz. Lütfen yöneticiyle iletişime geçin."
@@ -17,33 +22,25 @@ _ERROR_NETWORK = (
     "İnternet bağlantınızı kontrol edip tekrar deneyin."
 )
 _ERROR_EMPTY = "AI boş bir yanıt döndü. Lütfen tekrar deneyin."
-_ERROR_UNKNOWN = "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin."
+_ERROR_UNKNOWN = "Beklenemeyen bir hata oluştu. Lütfen tekrar deneyin."
 _ERROR_NO_KEY = (
     "AI servisi şu an kullanılamıyor. Lütfen yöneticiyle iletişime geçin."
 )
 
+
 def _get_api_key():
-    """Settings'ten API anahtarını doğrulayarak döner; yoksa None."""
-    key = getattr(settings, "GOOGLE_API_KEY", None)
+    """Settings'ten GEMINI API anahtarını doğrulayarak döner; yoksa None."""
+    key = getattr(settings, "GEMINI_API_KEY", None)
     if not key or str(key).strip() == "":
         return None
-    return key
+    # Tırnak işaretleri varsa kaldır
+    return str(key).strip().strip('"')
 
 
 def _build_client(api_key):
-    """Gemini Client nesnesi oluşturur."""
-    return genai.Client(api_key=api_key)
-
-
-def _extract_response_text(response):
-    """
-    Gemini yanıtından metin çıkarır.
-    Boş / None ise None döner.
-    """
-    text = getattr(response, "text", None)
-    if text and text.strip():
-        return text
-    return None
+    """Gemini Client'ını yapılandırır."""
+    genai.configure(api_key=api_key)
+    return genai.GenerativeModel(_MODEL_NAME)
 
 
 def _classify_api_error(error):
@@ -55,17 +52,18 @@ def _classify_api_error(error):
 
     if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
         return _ERROR_QUOTA
-    if "401" in error_str or "API_KEY_INVALID" in error_str:
+    if "401" in error_str or "UNAUTHENTICATED" in error_str or "PERMISSION_DENIED" in error_str:
         return _ERROR_AUTH
-    if "timeout" in error_str.lower() or "connection" in error_str.lower():
+    if "Connection" in error_str or "ConnectError" in error_str or "_InactiveRpcError" in error_str:
         return _ERROR_NETWORK
-
+    
     return _ERROR_UNKNOWN
+
 
 def ask_ai_coach(user_query):
     """
-    AI Study Coach'a soru sorar.
-
+    Kullanıcının eğitimle ilgili sorusunu Gemini API'ye sorar.
+    
     Returns:
         str: AI yanıtı veya kullanıcı dostu hata mesajı.
             Asla exception fırlatmaz.
@@ -75,43 +73,47 @@ def ask_ai_coach(user_query):
 
     api_key = _get_api_key()
     if not api_key:
-        logger.error("GOOGLE_API_KEY is missing — ask_ai_coach")
+        logger.error("🚨 GROQ_API_KEY is missing — ask_ai_coach")
         return _ERROR_NO_KEY
 
     prompt = _build_coach_prompt(user_query)
 
     try:
-        client = _build_client(api_key)
-        response = client.models.generate_content(
-            model=_MODEL_NAME,
-            contents=prompt,
-        )
+        model = _build_client(api_key)
+        logger.info("📡 Calling Gemini API for coaching...")
+        
+        response = model.generate_content(prompt)
 
-        text = _extract_response_text(response)
+        text = response.text.strip() if response.text else None
+        
         if not text:
-            logger.error("Gemini returned empty response in ask_ai_coach")
+            logger.error("🚨 Gemini returned empty response in ask_ai_coach")
             return _ERROR_EMPTY
+        
+        logger.info("✅ Gemini coach response received successfully")
         return text
 
     except Exception as e:
-        logger.error("Gemini API error in ask_ai_coach: %s", e)
+        logger.error(f"🚨 Gemini API error in ask_ai_coach: {type(e).__name__}: {e}")
         return _classify_api_error(e)
 
 
-def generate_study_program(target_exam, daily_hours):
+def generate_study_program(target_exam, daily_hours, course_names=None):
     """
-    Öğrenci için Gemini AI kullanarak haftalık ders programı oluşturur.
+    Gemini API kullanarak haftalık ders programı oluşturur.
 
     Returns:
         str: JSON string — başarılı yanıt veya {"error": "..."} formatında
             hata mesajı. Asla exception fırlatmaz.
     """
+    logger.info(f"🔍 generate_study_program called: target_exam='{target_exam}', daily_hours={daily_hours}")
+    
     # ── Girdi doğrulama ─────────────────────────────────────────────────
     if not target_exam or str(target_exam).strip() == "":
         logger.warning("generate_study_program called with empty target_exam")
         return json.dumps({
             "error": "Hedef sınav bilgisi eksik. "
-                     "Lütfen profil ayarlarınızı kontrol edin."
+            "Lütfen profil ayarlarınızı kontrol edin."
         })
 
     try:
@@ -125,36 +127,40 @@ def generate_study_program(target_exam, daily_hours):
         )
         return json.dumps({
             "error": "Günlük çalışma saati geçersiz. "
-                     "Lütfen 1-24 arası bir değer girin."
+            "Lütfen 1-24 arası bir değer girin."
         })
 
     # ── API anahtarı ────────────────────────────────────────────────────
     api_key = _get_api_key()
     if not api_key:
-        logger.error("GOOGLE_API_KEY is missing — generate_study_program")
+        logger.error("🚨 GEMINI_API_KEY is missing — generate_study_program")
         return json.dumps({"error": _ERROR_NO_KEY})
+    
+    logger.info("✅ API key found, building prompt...")
 
     # ── Prompt ──────────────────────────────────────────────────────────
-    prompt = _build_study_prompt(target_exam, daily_hours)
+    prompt = _build_study_prompt(target_exam, daily_hours, course_names)
 
     # ── API çağrısı ─────────────────────────────────────────────────────
     try:
-        client = _build_client(api_key)
-        response = client.models.generate_content(
-            model=_MODEL_NAME,
-            contents=prompt,
-            config={"response_mime_type": "application/json"},
-        )
+        model = _build_client(api_key)
+        logger.info("📡 Calling Gemini API for program generation...")
+        
+        response = model.generate_content(prompt)
 
-        text = _extract_response_text(response)
+        text = response.text.strip() if response.text else None
+        
         if not text:
-            logger.error("Gemini returned empty response for study program")
+            logger.error("🚨 Gemini returned empty response for study program")
             return json.dumps({"error": _ERROR_EMPTY})
+        
+        logger.info(f"✅ Gemini program generated successfully ({len(text)} chars)")
         return text
 
     except Exception as e:
-        logger.error("Gemini API error in generate_study_program: %s", e)
-        return json.dumps({"error": _classify_api_error(e)})
+        logger.error(f"🚨 Gemini API error in generate_study_program: {type(e).__name__}: {e}")
+        error_msg = _classify_api_error(e)
+        return json.dumps({"error": error_msg})
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -162,21 +168,16 @@ def generate_study_program(target_exam, daily_hours):
 # ─────────────────────────────────────────────────────────────────────────────
 def _build_coach_prompt(user_query):
     """AI Study Coach için yapılandırılmış prompt oluşturur."""
-    return f"""\
-## KİMLİK
-Sen "AI Study Coach" adında, Türkçe konuşan, deneyimli bir eğitim koçusun.
-Görevin öğrencilere ders çalışma, sınav hazırlığı, motivasyon ve zaman \
-yönetimi konularında rehberlik etmek.
+    system_instruction = """Sen "AI Study Coach" adında, Türkçe konuşan, deneyimli bir eğitim koçusun.
+Görevin öğrencilere ders çalışma, sınav hazırlığı, motivasyon ve zaman yönetimi konularında rehberlik etmek.
 
-## KİŞİLİK KURALLARI
+KİŞİLİK KURALLARI:
 - Samimi ama profesyonel bir dil kullan; öğrenciyle "sen" diye konuş.
 - Empati kur: öğrencinin stresini, kaygısını anladığını hissettir.
 - Her yanıtın somut ve uygulanabilir olsun; genel geçer klişelerden kaçın.
 - Gerektiğinde küçük örnekler veya senaryolar ver.
 
-## YANIT FORMATI
-Yanıtını şu yapıya göre oluştur:
-
+YANIT FORMATI:
 1. Kısa ve empatik bir giriş cümlesi (1-2 cümle).
 2. Sorunun özüne yönelik açıklama veya tavsiyeler — madde işaretleri kullan:
    • Her madde tek bir fikre odaklansın.
@@ -184,45 +185,39 @@ Yanıtını şu yapıya göre oluştur:
 3. Varsa mini günlük/haftalık plan önerisi.
 4. Motivasyon veren kısa bir kapanış cümlesi.
 
-## ÖNEMLİ KISITLAR
+ÖNEMLİ KISITLAR:
 - Sadece düz metin yaz, Markdown biçimlendirmesi (**, ##, ```) kullanMA.
 - Madde işareti olarak sadece "•" karakterini kullan.
 - Yanıtını 300 kelimeyi aşmayacak şekilde tut.
-- Tıbbi, hukuki veya psikolojik teşhis koyma; gerekirse uzmana yönlendir.
-
-## ÖĞRENCİNİN SORUSU
-{user_query}
-"""
+- Tıbbi, hukuki veya psikolojik teşhis koyma; gerekirse uzmana yönlendir."""
+    
+    return f"{system_instruction}\n\n## ÖĞRENCİNİN SORUSU\n{user_query}"
 
 
-def _build_study_prompt(target_exam, daily_hours):
+def _build_study_prompt(target_exam, daily_hours, course_names=None):
     """Haftalık program promptunu oluşturur."""
-    return f"""\
-## ROL
+    courses_rule = ""
+    if course_names:
+        courses_rule = f"\n\n🚨 ÇOK ÖNEMLİ KURAL: PROGRAMA SADECE ŞU DERSLERİ EKLE: {', '.join(course_names)}.\nBU LİSTEDE OLMAYAN HİÇBİR DERSİ KESİNLİKLE PROGRAMA ALMA!"
+
+    return f"""## ROL
 Sen Türkiye'nin en başarılı eğitim planlama uzmanlarından birisin.
-Görevin: '{target_exam}' sınavına hazırlanan ve günde {daily_hours} saat \
-çalışabilen bir öğrenci için bilimsel temelli, uygulanabilir bir haftalık \
-ders programı oluşturmak.
+Görevin: '{target_exam}' sınavına hazırlanan ve günde {daily_hours} saat çalışabilen bir öğrenci için bilimsel temelli, uygulanabilir bir haftalık ders programı oluşturmak.
 
 ## PLANLAMA KURALLARI
-1. Haftanın 7 gününü de kapsa: Pazartesi, Salı, Çarşamba, Perşembe, Cuma, \
-Cumartesi, Pazar.
+1. Haftanın 7 gününü de kapsa: Pazartesi, Salı, Çarşamba, Perşembe, Cuma, Cumartesi, Pazar.
 2. Günlük toplam ders saati tam olarak {daily_hours} saat olmalı.
 3. Her ders bloğu en az 1, en fazla 2 saat olsun.
 4. Saatler 08:00 ile 22:00 arasında olmalı.
 5. Ardışık 2 saatten fazla aynı ders olmasın — dikkat dağılmasını önle.
-6. Her 2 saatlik çalışma bloğundan sonra en az 15 dakika mola planla \
-(molayı "Mola" adıyla ekle).
-7. Zor dersleri (Matematik, Fen) sabah saatlerine; ezbere dayalı dersleri \
-(Tarih, Coğrafya) öğleden sonraya koy.
-8. Cumartesi veya Pazar'dan birinde hafif bir tekrar / deneme sınavı günü \
-yap — toplam saati biraz azaltabilirsin.
-9. "ders" değeri Türkçe ders adı olmalı (Matematik, Fizik, Kimya, Biyoloji, \
-Türkçe, Tarih, Coğrafya, Geometri, Paragraf, İngilizce, vb.).
+6. Her 2 saatlik çalışma bloğundan sonra EN AZ 30 DAKİKA mola planla (molayı "Mola" adıyla ekle).
+7. Zor dersleri sabah saatlerine; ezbere dayalı dersleri öğleden sonraya koy.
+8. Cumartesi veya Pazar'dan birinde hafif bir tekrar / deneme sınavı günü yap.
+9. "ders" değeri Türkçe ders adı olmalı.{courses_rule}
+10. Dersleri ve molaları zaman olarak ASLA birbiriyle çakıştırma. Her bir blok birbirini sırasıyla takip etmeli.
 
 ## JSON FORMAT — ZORUNLU
-Sadece aşağıdaki JSON formatında yanıt ver. Markdown (```json) veya \
-açıklama metni YAZMA.
+Sadece aşağıdaki JSON formatında yanıt ver. Markdown (```json) veya açıklama metni YAZMA.
 
 {{
   "program": [

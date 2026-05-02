@@ -163,6 +163,25 @@
         </div>
     </div>
 
+    <style>
+        .course-card {
+            box-sizing: border-box;
+        }
+        .short-card {
+            padding: 2px 6px !important;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .short-card .course-title {
+            margin-bottom: 0;
+            font-size: 0.75rem;
+        }
+        .short-card .course-time-text {
+            font-size: 0.7rem;
+        }
+    </style>
     <script>
         const responseJson = {{ program|safe }};
         const START_HOUR = 8;
@@ -204,6 +223,9 @@
 
                 const card = document.createElement('div');
                 card.className = 'course-card';
+                if (heightPx <= 30) {
+                    card.classList.add('short-card');
+                }
                 card.style.top = topPx + 'px';
                 card.style.height = heightPx + 'px';
                 card.style.backgroundColor = lessonColors[item.ders];

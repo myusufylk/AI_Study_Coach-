@@ -6,6 +6,7 @@ Bu dosya yalnızca form işleme, yetkilendirme ve şablon
 render işlemlerinden sorumludur.
 """
 
+import json
 import logging
 
 from django.shortcuts import render, redirect
@@ -285,7 +286,7 @@ def weekly_goal_view(request):
 # ─────────────────────────────────────────────────────────────────────────────
 @login_required
 def ai_coach_view(request):
-    """AI koç — tüm Gemini mantığı ai_service.ask_ai_coach()'a devredildi."""
+    """AI koç — tüm Groq mantığı ai_service.ask_ai_coach()'a devredildi."""
     response_text = ""
 
     if request.method == "POST":
@@ -306,20 +307,42 @@ def generate_program(request):
     if resp:
         return resp
 
+    course_names = [c.name for c in profile.selected_courses.all()]
     try:
-        program = generate_study_program(profile.target_exam, profile.daily_hours)
+        program = generate_study_program(profile.target_exam, profile.daily_hours, course_names)
     except Exception:
         logger.exception("Unexpected error calling generate_study_program")
         messages.error(request, "Program oluşturulurken beklenmeyen bir hata oluştu.")
         return redirect("home")
 
-    if '"error"' in program or "⚠️" in program:
-        messages.error(request, "AI programı oluşturamadı. Lütfen tekrar deneyin.")
+    # JSON'ı parse et ve error kontrolü yap
+    try:
+        # Markdown bloklarını temizle (```json ... ```)
+        cleaned_program = program.strip()
+        if cleaned_program.startswith("```json"):
+            cleaned_program = cleaned_program[7:]
+        elif cleaned_program.startswith("```"):
+            cleaned_program = cleaned_program[3:]
+        
+        if cleaned_program.endswith("```"):
+            cleaned_program = cleaned_program[:-3]
+            
+        cleaned_program = cleaned_program.strip()
+        
+        program_data = json.loads(cleaned_program)
+        
+        if isinstance(program_data, dict) and "error" in program_data:
+            error_msg = program_data.get("error", "Bilinmeyen bir hata oluştu.")
+            messages.error(request, f"AI programı oluşturamadı: {error_msg}")
+            return redirect("home")
+    except json.JSONDecodeError:
+        logger.error("Invalid JSON response from generate_study_program: %s", program)
+        messages.error(request, "Program formatı geçersiz. Lütfen tekrar deneyin.")
         return redirect("home")
 
     try:
         StudyPlan.objects.filter(user=request.user).delete()
-        StudyPlan.objects.create(user=request.user, plan_content=program)
+        StudyPlan.objects.create(user=request.user, plan_content=cleaned_program)
     except Exception:
         logger.exception("DB error saving study plan for user=%s", request.user)
         messages.error(request, "Program kaydedilirken bir sorun oluştu.")
