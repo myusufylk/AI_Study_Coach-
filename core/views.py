@@ -19,6 +19,8 @@ from django.contrib.auth.decorators import login_required
 from .forms import ProfileForm
 from .models import Profile, StudyPlan, Course
 from .ai_service import generate_study_program, ask_ai_coach
+from .youtube_service import get_youtube_videos
+from django.http import JsonResponse
 
 logger = logging.getLogger(__name__)
 
@@ -194,16 +196,34 @@ def profile_view(request):
 # ─────────────────────────────────────────────────────────────────────────────
 @login_required
 def subjects_view(request):
+    """
+    Kullanıcının derslerini ve her ders için çalışacağı konuyu kaydettiği sayfa.
+    """
+    profile, resp = _get_profile_or_redirect(request)
+    if resp:
+        return resp
+
     if request.method == "POST":
-        selected_subjects = request.POST.getlist("subject")
-        profile, resp = _get_profile_or_redirect(request)
-        if resp:
-            return resp
+        selected_subject_ids = request.POST.getlist("subject_ids")
+        topics_data = {}
+
+        # Seçilen her ders ID'si için ilgili konuyu al
+        for sid in selected_subject_ids:
+            topic_key = f"topic_{sid}"
+            topic_value = request.POST.get(topic_key, "").strip()
+            # Ders ismini bul (JSON'da isim tutmak dashboard'da daha kolay)
+            course = Course.objects.filter(id=sid).first()
+            if course:
+                topics_data[course.name] = topic_value
 
         try:
-            profile.selected_subjects = ",".join(selected_subjects)
+            # ManyToMany ilişkisini güncelle (Ders ID listesiyle)
+            profile.selected_courses.set(selected_subject_ids)
+            # Konu verilerini JSONField içine kaydet
+            profile.course_topics = topics_data
             profile.save()
-            messages.success(request, "Ders seçimleriniz başarıyla kaydedildi!")
+            
+            messages.success(request, "Ders ve konu seçimleriniz başarıyla kaydedildi!")
             return redirect("home")
         except Exception:
             logger.exception("Error saving subjects for user=%s", request.user)
@@ -212,24 +232,57 @@ def subjects_view(request):
 
     # GET — ders listesi sayfası
     try:
-        profile = Profile.objects.filter(user=request.user).first()
         all_courses = Course.objects.all()
-        selected_ids = []
-        if profile and hasattr(profile, "selected_courses"):
-            selected_ids = list(
-                profile.selected_courses.values_list("id", flat=True)
-            )
+        
+        # Eğer veritabanı boşsa varsayılan dersleri otomatik oluştur
+        if not all_courses.exists():
+            default_courses = [
+                "Matematik", "Fizik", "Kimya", "Biyoloji", 
+                "Türkçe", "Tarih", "Coğrafya", "İngilizce"
+            ]
+            for c_name in default_courses:
+                Course.objects.get_or_create(name=c_name, defaults={'category': 'Genel'})
+            all_courses = Course.objects.all()
+
+        selected_ids = list(profile.selected_courses.values_list("id", flat=True))
+        # JSON alanından mevcut konuları al (şablonda göstermek için)
+        current_topics = profile.course_topics or {}
     except Exception:
         logger.exception("Error loading subjects page for user=%s", request.user)
         all_courses = []
-        profile = None
         selected_ids = []
+        current_topics = {}
 
     return render(request, "subjects.html", {
         "courses": all_courses,
-        "profile": profile,
-        "selected_subjects": selected_ids,
+        "selected_ids": selected_ids,
+        "current_topics": current_topics,
     })
+
+@login_required
+def api_get_videos(request):
+    """
+    Dashboard'dan gelen AJAX isteğiyle YouTube videolarını döner.
+    """
+    lesson_name = request.GET.get('lesson', '').strip()
+    # AJAX'tan gelen spesifik konu (eğer varsa)
+    provided_topic = request.GET.get('topic', '').strip()
+    
+    profile, resp = _get_profile_or_redirect(request)
+    
+    if not lesson_name:
+        return JsonResponse({'error': 'Ders adı eksik.'}, status=400)
+
+    # Eğer AJAX'tan konu gelmediyse profildeki JSON alanından bu dersin konusunu bul
+    topic = provided_topic
+    if not topic and profile and profile.course_topics:
+        topic = profile.course_topics.get(lesson_name, "")
+
+    # Arama sorgusu oluştur (Ders + Varsa Konu)
+    search_query = f"{lesson_name} {topic}"
+    videos = get_youtube_videos(search_query)
+
+    return JsonResponse({'videos': videos})
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -309,7 +362,7 @@ def generate_program(request):
 
     course_names = [c.name for c in profile.selected_courses.all()]
     try:
-        program = generate_study_program(profile.target_exam, profile.daily_hours, course_names)
+        program = generate_study_program(profile.target_exam, profile.daily_hours, course_names, profile.course_topics)
     except Exception:
         logger.exception("Unexpected error calling generate_study_program")
         messages.error(request, "Program oluşturulurken beklenmeyen bir hata oluştu.")

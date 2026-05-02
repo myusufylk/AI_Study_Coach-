@@ -30,7 +30,7 @@
             <div class="info-item">
                 <span class="info-item-badge badge--indigo">🎯</span>
                 <div>
-                    <div class="info-item-label">Hedef Sınav</div>
+                    <div class="info-item-label">Haftalık Hedef</div>
                     <div class="info-item-value">{{ profile.target_exam }}</div>
                 </div>
             </div>
@@ -83,7 +83,7 @@
                     <span class="quick-link-icon">🤖</span>
                     <span>AI Koça Sor</span>
                 </a>
-                <a href="{% url 'weekly_goal' %}" class="quick-link-item">
+                <a href="{% url 'profile' %}" class="quick-link-item">
                     <span class="quick-link-icon">🎯</span>
                     <span>Haftalık Hedef</span>
                 </a>
@@ -239,12 +239,201 @@
                     '<div class="course-title">' + item.ders + '</div>' +
                     '<div class="course-time-text">' + item.baslangic + ' - ' + item.bitis + '</div>';
 
+                // "Mola" olmayan dersler için video butonu ekle
+                if (item.ders.toLowerCase() !== 'mola') {
+                    const videoBtn = document.createElement('button');
+                    videoBtn.className = 'video-btn-mini';
+                    videoBtn.innerHTML = '📺';
+                    videoBtn.title = 'Konu Anlatım Videoları';
+                    videoBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        // Eğer AI dersin yanına bir konu eklediyse onu da gönder
+                        openVideoModal(item.ders, item.konu || "");
+                    };
+                    card.appendChild(videoBtn);
+                }
+
                 columnElement.appendChild(card);
             });
         }
 
+        function openVideoModal(lessonName, topicName) {
+            const modal = document.getElementById('videoModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const videoList = document.getElementById('videoList');
+            
+            modalTitle.innerText = lessonName + (topicName ? ' (' + topicName + ')' : '') + ' - Video Önerileri';
+            videoList.innerHTML = '<div class="loader-container"><div class="loader"></div><p>Videolar getiriliyor...</p></div>';
+            modal.style.display = 'flex';
+
+            let apiUrl = `/api/get-videos/?lesson=${encodeURIComponent(lessonName)}`;
+            if (topicName) {
+                apiUrl += `&topic=${encodeURIComponent(topicName)}`;
+            }
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.videos && data.videos.length > 0) {
+                        videoList.innerHTML = '';
+                        data.videos.forEach(video => {
+                            const videoItem = document.createElement('div');
+                            videoItem.className = 'video-item';
+                            videoItem.innerHTML = `
+                                <div class="video-preview">
+                                    <iframe src="${video.embed_url}" frameborder="0" allowfullscreen></iframe>
+                                </div>
+                                <div class="video-info">
+                                    <h4 class="video-title">${video.title}</h4>
+                                    <p class="video-channel">${video.channel_title}</p>
+                                    <a href="${video.video_url}" target="_blank" class="btn-watch-yt">YouTube'da İzle</a>
+                                </div>
+                            `;
+                            videoList.appendChild(videoItem);
+                        });
+                    } else {
+                        videoList.innerHTML = '<p class="no-videos">Üzgünüz, bu ders için video bulunamadı.</p>';
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    videoList.innerHTML = '<p class="no-videos">Bir hata oluştu. Lütfen daha sonra tekrar deneyin.</p>';
+                });
+        }
+
+        function closeVideoModal() {
+            document.getElementById('videoModal').style.display = 'none';
+            document.getElementById('videoList').innerHTML = '';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('videoModal');
+            if (event.target == modal) {
+                closeVideoModal();
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', renderActiveSchedule);
     </script>
+
+    <!-- YouTube Video Modal -->
+    <div id="videoModal" class="custom-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Video Önerileri</h3>
+                <span class="close-btn" onclick="closeVideoModal()">&times;</span>
+            </div>
+            <div id="videoList" class="modal-body">
+                <!-- Videolar buraya gelecek -->
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .video-btn-mini {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 4px;
+            color: white;
+            padding: 2px 5px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            z-index: 5;
+        }
+        .video-btn-mini:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Modal Styles */
+        .custom-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 0;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: modalSlide 0.3s ease-out;
+        }
+        @keyframes modalSlide {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+        .modal-header h3 { margin: 0; font-weight: 700; color: #1e293b; }
+        .close-btn { font-size: 28px; font-weight: bold; color: #64748b; cursor: pointer; }
+        .close-btn:hover { color: #1e293b; }
+        .modal-body { padding: 2rem; }
+
+        .video-item {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 15px;
+            border: 1px solid #e2e8f0;
+        }
+        .video-preview { flex: 1; min-width: 280px; }
+        .video-preview iframe { width: 100%; aspect-ratio: 16/9; border-radius: 10px; }
+        .video-info { flex: 1.2; display: flex; flex-direction: column; justify-content: center; }
+        .video-title { margin: 0 0 0.5rem 0; font-size: 1.1rem; font-weight: 600; color: #1e293b; line-height: 1.4; }
+        .video-channel { color: #64748b; font-size: 0.9rem; margin-bottom: 1rem; }
+        .btn-watch-yt {
+            align-self: flex-start;
+            background: #ef4444;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn-watch-yt:hover { background: #dc2626; }
+
+        /* Loader */
+        .loader-container { text-align: center; padding: 3rem; }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #6366f1;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .no-videos { text-align: center; color: #64748b; padding: 2rem; }
+    </style>
 
     {% else %}
 

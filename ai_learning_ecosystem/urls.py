@@ -38,4 +38,6 @@ urlpatterns = [
     # Ders İzleme sayfası
     path('lesson_watch/', views.lesson_watch, name='lesson_watch'),
 
+    # API: YouTube videolarını getir
+    path('api/get-videos/', views.api_get_videos, name='api_get_videos'),
 ]

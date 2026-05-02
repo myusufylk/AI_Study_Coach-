@@ -98,7 +98,7 @@ def ask_ai_coach(user_query):
         return _classify_api_error(e)
 
 
-def generate_study_program(target_exam, daily_hours, course_names=None):
+def generate_study_program(target_exam, daily_hours, course_names=None, course_topics=None):
     """
     Gemini API kullanarak haftalık ders programı oluşturur.
 
@@ -139,7 +139,7 @@ def generate_study_program(target_exam, daily_hours, course_names=None):
     logger.info("✅ API key found, building prompt...")
 
     # ── Prompt ──────────────────────────────────────────────────────────
-    prompt = _build_study_prompt(target_exam, daily_hours, course_names)
+    prompt = _build_study_prompt(target_exam, daily_hours, course_names, course_topics)
 
     # ── API çağrısı ─────────────────────────────────────────────────────
     try:
@@ -194,11 +194,22 @@ YANIT FORMATI:
     return f"{system_instruction}\n\n## ÖĞRENCİNİN SORUSU\n{user_query}"
 
 
-def _build_study_prompt(target_exam, daily_hours, course_names=None):
+def _build_study_prompt(target_exam, daily_hours, course_names=None, course_topics=None):
     """Haftalık program promptunu oluşturur."""
     courses_rule = ""
     if course_names:
-        courses_rule = f"\n\n🚨 ÇOK ÖNEMLİ KURAL: PROGRAMA SADECE ŞU DERSLERİ EKLE: {', '.join(course_names)}.\nBU LİSTEDE OLMAYAN HİÇBİR DERSİ KESİNLİKLE PROGRAMA ALMA!"
+        courses_str = ", ".join(course_names)
+        topics_str = ""
+        if course_topics:
+            topics_list = []
+            for course, topic in course_topics.items():
+                if topic:
+                    topics_list.append(f"{course} ({topic})")
+                else:
+                    topics_list.append(course)
+            topics_str = "\n\nBELİRLENEN KONULAR:\n" + "\n".join([f"- {t}" for t in topics_list])
+
+        courses_rule = f"\n\n🚨 ÇOK ÖNEMLİ KURAL: PROGRAMA SADECE ŞU DERSLERİ EKLE: {courses_str}.\nBU LİSTEDE OLMAYAN HİÇBİR DERSİ KESİNLİKLE PROGRAMA ALMA!{topics_str}"
 
     return f"""## ROL
 Sen Türkiye'nin en başarılı eğitim planlama uzmanlarından birisin.
@@ -215,6 +226,7 @@ Görevin: '{target_exam}' sınavına hazırlanan ve günde {daily_hours} saat ç
 8. Cumartesi veya Pazar'dan birinde hafif bir tekrar / deneme sınavı günü yap.
 9. "ders" değeri Türkçe ders adı olmalı.{courses_rule}
 10. Dersleri ve molaları zaman olarak ASLA birbiriyle çakıştırma. Her bir blok birbirini sırasıyla takip etmeli.
+11. ÖZELLİKLE BELİRTİLEN KONULARA PROGRAMDA ÖNCELİK VER VE BU KONULARI "konu" ALANINA YAZ.
 
 ## JSON FORMAT — ZORUNLU
 Sadece aşağıdaki JSON formatında yanıt ver. Markdown (```json) veya açıklama metni YAZMA.

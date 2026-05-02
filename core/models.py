@@ -15,6 +15,8 @@ class Profile(models.Model):
     daily_hours = models.IntegerField(default=4)
     # YENİ: Kullanıcının seçtiği dersleri veritabanında tutmak için ManyToMany ekledik
     selected_courses = models.ManyToManyField(Course, blank=True)
+    # Her ders için kullanıcının çalışmak istediği konuyu tutan JSON alanı (Örn: {"Matematik": "Türev"})
+    course_topics = models.JSONField(default=dict, blank=True, null=True, verbose_name="Ders Konuları")
     weekly_goal = models.TextField(blank=True, null=True, verbose_name="Haftalık Hedef")
 
     def __str__(self):
