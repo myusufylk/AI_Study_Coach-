@@ -183,7 +183,7 @@
         }
     </style>
     <script>
-        const responseJson = {{ program|safe }};
+        const responseJson = {{ program|safe|default:"null" }};
         const START_HOUR = 8;
         const PIXELS_PER_HOUR = 60;
         const colorPalette = [

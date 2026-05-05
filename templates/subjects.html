@@ -29,8 +29,7 @@
                         <span class="goals-checkbox-label">{{ course.name }}</span>
                     </label>
                     
-                    <div id="topic_input_{{ course.id }}" class="topic-input-wrapper" 
-                         style="{% if course.id in selected_ids %}display: block;{% else %}display: none;{% endif %}">
+                    <div id="topic_input_{{ course.id }}" class="topic-input-wrapper {% if course.id in selected_ids %}is-visible{% endif %}">
                         <input type="text" name="topic_{{ course.id }}" 
                                placeholder="Hangi konuya çalışacaksın?"
                                class="topic-text-input"
@@ -49,14 +48,14 @@
             function toggleTopicInput(checkbox, inputId) {
                 const inputWrapper = document.getElementById(inputId);
                 if (checkbox.checked) {
-                    inputWrapper.style.display = 'block';
+                    inputWrapper.classList.add('is-visible');
                     inputWrapper.style.opacity = '0';
                     setTimeout(() => {
                         inputWrapper.style.transition = 'opacity 0.3s ease';
                         inputWrapper.style.opacity = '1';
                     }, 10);
                 } else {
-                    inputWrapper.style.display = 'none';
+                    inputWrapper.classList.remove('is-visible');
                 }
             }
         </script>
@@ -77,6 +76,10 @@
             .topic-input-wrapper {
                 margin-top: 0.8rem;
                 padding-left: 2.2rem;
+                display: none; /* Varsayılan olarak kapalı */
+            }
+            .topic-input-wrapper.is-visible {
+                display: block; /* Bu sınıf varsa aç */
             }
             .topic-text-input {
                 width: 100%;
